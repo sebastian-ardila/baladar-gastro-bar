@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "menu": "Carta",
+    "reservations": "Reservas",
+    "schedule": "Horarios",
+    "history": "Historia",
+    "contact": "Contacto"
+  },
+  "hero": {
+    "phrase": "Cocina local y saludable, laboratorio de experiencias y buena música",
+    "cta": "Ver nuestra carta"
+  },
+  "menu": {
+    "title": "Nuestra Carta",
+    "all": "Todos",
+    "viewDish": "Ver plato",
+    "addToCart": "Agregar",
+    "added": "Agregado",
+    "small": "Pequeña",
+    "medium": "Mediana",
+    "portions": "porciones",
+    "extraIceCream": "Bola extra de helado +$3.000",
+    "comboTitle": "Pizza Combinada",
+    "comboSpecialTitle": "Pizza Especial Combinada",
+    "selectHalf1": "Selecciona la primera mitad",
+    "selectHalf2": "Selecciona la segunda mitad",
+    "askDaily": "Pregunta por nuestros platos del día"
+  },
+  "cart": {
+    "title": "Tu Pedido",
+    "empty": "Tu carrito está vacío",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "continue": "Continuar",
+    "deleteOrder": "Eliminar pedido",
+    "back": "Volver",
+    "sendWhatsApp": "Enviar pedido por WhatsApp",
+    "name": "Nombre",
+    "namePlaceholder": "Tu nombre",
+    "paymentMethod": "Forma de pago",
+    "transfer": "Transferencia",
+    "card": "Tarjeta",
+    "cash": "Efectivo",
+    "orderType": "Tipo de pedido",
+    "dineIn": "Para la mesa",
+    "delivery": "A domicilio",
+    "orderSummary": "Resumen del pedido",
+    "close": "Cerrar"
+  },
+  "reservation": {
+    "title": "Reservar Mesa",
+    "subtitle": "Reserva tu mesa en Baladar Gastro Bar",
+    "name": "Nombre",
+    "namePlaceholder": "Tu nombre completo",
+    "guests": "Número de personas",
+    "date": "Fecha",
+    "time": "Hora",
+    "comments": "Comentarios adicionales",
+    "commentsPlaceholder": "Algún requerimiento especial...",
+    "submit": "Reservar por WhatsApp",
+    "location": "Ubicación",
+    "hours": "Horarios"
+  },
+  "schedule": {
+    "title": "Horarios",
+    "subtitle": "Te esperamos en Baladar Gastro Bar",
+    "location": "Ubicación",
+    "delivery": "Domicilios a todo Pereira",
+    "reserveTable": "Reservar mesa",
+    "orderWhatsApp": "Pedir por WhatsApp",
+    "closed": "Cerrado"
+  },
+  "history": {
+    "title": "Nuestra Historia",
+    "p1": "Baladar Gastro Bar nació como un sueño de crear un espacio único en Pereira, donde la cocina local y saludable se fusiona con la buena música y las experiencias memorables.",
+    "p2": "Somos el secreto mejor guardado de la ciudad, un oasis natural en medio del caos urbano donde cada plato cuenta una historia y cada visita se convierte en un recuerdo.",
+    "p3": "Porque creemos en el consumo responsable y consciente, todos nuestros ingredientes son de origen local. Cada receta es una celebración de nuestra tierra y nuestra gente.",
+    "p4": "Desde nuestras pizzas artesanales hasta nuestros cócteles de autor, cada elemento de nuestra carta ha sido pensado para ofrecerte una experiencia gastronómica única.",
+    "cta": "Conoce nuestra carta",
+    "tagline": "Somos cocina local y saludable"
+  },
+  "contact": {
+    "title": "Contacto",
+    "subtitle": "¿Tienes algo en mente? Escríbenos",
+    "name": "Nombre",
+    "namePlaceholder": "Tu nombre completo",
+    "email": "Correo electrónico",
+    "emailPlaceholder": "tu@email.com",
+    "phone": "Teléfono",
+    "phonePlaceholder": "Tu número de teléfono",
+    "interest": "Tipo de interés",
+    "interests": {
+      "franchise": "Franquicia",
+      "supplier": "Proveedor",
+      "collaboration": "Colaboración",
+      "events": "Eventos",
+      "birthday": "Cumpleaños",
+      "other": "Otros"
+    },
+    "message": "Mensaje",
+    "messagePlaceholder": "Cuéntanos en qué podemos ayudarte...",
+    "submit": "Enviar por WhatsApp"
+  },
+  "footer": {
+    "gastroBar": "Gastro Bar",
+    "delivery": "Domicilios a todo Pereira",
+    "hours": "Horarios",
+    "followUs": "Síguenos",
+    "rights": "Todos los derechos reservados",
+    "madeBy": "Sitio web creado por"
+  },
+  "breadcrumb": {
+    "home": "Inicio"
+  },
+  "lang": {
+    "switch": "EN"
+  }
+}

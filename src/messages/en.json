@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "home": "Home",
+    "menu": "Menu",
+    "reservations": "Reservations",
+    "schedule": "Hours",
+    "history": "Our Story",
+    "contact": "Contact"
+  },
+  "hero": {
+    "phrase": "Local and healthy cuisine, a laboratory of experiences and great music",
+    "cta": "View our menu"
+  },
+  "menu": {
+    "title": "Our Menu",
+    "all": "All",
+    "viewDish": "View dish",
+    "addToCart": "Add",
+    "added": "Added",
+    "small": "Small",
+    "medium": "Medium",
+    "portions": "slices",
+    "extraIceCream": "Extra ice cream scoop +$3,000",
+    "comboTitle": "Combo Pizza",
+    "comboSpecialTitle": "Special Combo Pizza",
+    "selectHalf1": "Select the first half",
+    "selectHalf2": "Select the second half",
+    "askDaily": "Ask about our daily dishes"
+  },
+  "cart": {
+    "title": "Your Order",
+    "empty": "Your cart is empty",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "continue": "Continue",
+    "deleteOrder": "Delete order",
+    "back": "Go back",
+    "sendWhatsApp": "Send order via WhatsApp",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "paymentMethod": "Payment method",
+    "transfer": "Bank transfer",
+    "card": "Credit card",
+    "cash": "Cash",
+    "orderType": "Order type",
+    "dineIn": "Dine-in",
+    "delivery": "Delivery",
+    "orderSummary": "Order summary",
+    "close": "Close"
+  },
+  "reservation": {
+    "title": "Book a Table",
+    "subtitle": "Reserve your table at Baladar Gastro Bar",
+    "name": "Name",
+    "namePlaceholder": "Your full name",
+    "guests": "Number of guests",
+    "date": "Date",
+    "time": "Time",
+    "comments": "Additional comments",
+    "commentsPlaceholder": "Any special requirements...",
+    "submit": "Book via WhatsApp",
+    "location": "Location",
+    "hours": "Hours"
+  },
+  "schedule": {
+    "title": "Hours",
+    "subtitle": "We're waiting for you at Baladar Gastro Bar",
+    "location": "Location",
+    "delivery": "Delivery all over Pereira",
+    "reserveTable": "Book a table",
+    "orderWhatsApp": "Order via WhatsApp",
+    "closed": "Closed"
+  },
+  "history": {
+    "title": "Our Story",
+    "p1": "Baladar Gastro Bar was born as a dream to create a unique space in Pereira, where local and healthy cuisine merges with great music and memorable experiences.",
+    "p2": "We are the city's best kept secret, a natural oasis in the middle of urban chaos where every dish tells a story and every visit becomes a memory.",
+    "p3": "Because we believe in responsible and conscious consumption, all our ingredients are locally sourced. Every recipe is a celebration of our land and our people.",
+    "p4": "From our artisan pizzas to our signature cocktails, every element of our menu has been designed to offer you a unique gastronomic experience.",
+    "cta": "Discover our menu",
+    "tagline": "We are local and healthy cuisine"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Have something in mind? Write to us",
+    "name": "Name",
+    "namePlaceholder": "Your full name",
+    "email": "Email",
+    "emailPlaceholder": "you@email.com",
+    "phone": "Phone",
+    "phonePlaceholder": "Your phone number",
+    "interest": "Type of interest",
+    "interests": {
+      "franchise": "Franchise",
+      "supplier": "Supplier",
+      "collaboration": "Collaboration",
+      "events": "Events",
+      "birthday": "Birthday",
+      "other": "Other"
+    },
+    "message": "Message",
+    "messagePlaceholder": "Tell us how we can help you...",
+    "submit": "Send via WhatsApp"
+  },
+  "footer": {
+    "gastroBar": "Gastro Bar",
+    "delivery": "Delivery all over Pereira",
+    "hours": "Hours",
+    "followUs": "Follow us",
+    "rights": "All rights reserved",
+    "madeBy": "Website created by"
+  },
+  "breadcrumb": {
+    "home": "Home"
+  },
+  "lang": {
+    "switch": "ES"
+  }
+}
