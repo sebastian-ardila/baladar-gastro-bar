@@ -9,12 +9,14 @@ interface CartContextType {
   step: 1 | 2;
   addItem: (item: CartItem) => void;
   removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  incrementItem: (id: string) => void;
+  decrementItem: (id: string) => void;
   clearCart: () => void;
   toggleCart: () => void;
   openCart: () => void;
   closeCart: () => void;
   setStep: (step: 1 | 2) => void;
+  getQuantity: (id: string) => number;
   totalItems: number;
   subtotal: number;
 }
@@ -22,7 +24,8 @@ interface CartContextType {
 type Action =
   | { type: 'ADD_ITEM'; payload: CartItem }
   | { type: 'REMOVE_ITEM'; payload: string }
-  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
+  | { type: 'INCREMENT'; payload: string }
+  | { type: 'DECREMENT'; payload: string }
   | { type: 'CLEAR_CART' }
   | { type: 'TOGGLE_CART' }
   | { type: 'OPEN_CART' }
@@ -39,29 +42,34 @@ interface State {
 function cartReducer(state: State, action: Action): State {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existingIndex = state.items.findIndex(
-        (item) => item.id === action.payload.id && item.withExtra === action.payload.withExtra
-      );
-      if (existingIndex > -1) {
-        const newItems = [...state.items];
-        newItems[existingIndex] = {
-          ...newItems[existingIndex],
-          quantity: newItems[existingIndex].quantity + 1,
-        };
-        return { ...state, items: newItems };
+      const idx = state.items.findIndex((i) => i.id === action.payload.id);
+      if (idx > -1) {
+        const updated = [...state.items];
+        updated[idx] = { ...updated[idx], quantity: updated[idx].quantity + 1 };
+        return { ...state, items: updated };
       }
       return { ...state, items: [...state.items, { ...action.payload, quantity: 1 }] };
     }
     case 'REMOVE_ITEM':
-      return { ...state, items: state.items.filter((item) => item.id !== action.payload) };
-    case 'UPDATE_QUANTITY': {
-      if (action.payload.quantity <= 0) {
-        return { ...state, items: state.items.filter((item) => item.id !== action.payload.id) };
+      return { ...state, items: state.items.filter((i) => i.id !== action.payload) };
+    case 'INCREMENT': {
+      return {
+        ...state,
+        items: state.items.map((i) =>
+          i.id === action.payload ? { ...i, quantity: i.quantity + 1 } : i
+        ),
+      };
+    }
+    case 'DECREMENT': {
+      const item = state.items.find((i) => i.id === action.payload);
+      if (!item) return state;
+      if (item.quantity <= 1) {
+        return { ...state, items: state.items.filter((i) => i.id !== action.payload) };
       }
       return {
         ...state,
-        items: state.items.map((item) =>
-          item.id === action.payload.id ? { ...item, quantity: action.payload.quantity } : item
+        items: state.items.map((i) =>
+          i.id === action.payload ? { ...i, quantity: i.quantity - 1 } : i
         ),
       };
     }
@@ -115,13 +123,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = useCallback((item: CartItem) => dispatch({ type: 'ADD_ITEM', payload: item }), []);
   const removeItem = useCallback((id: string) => dispatch({ type: 'REMOVE_ITEM', payload: id }), []);
-  const updateQuantity = useCallback((id: string, quantity: number) =>
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } }), []);
+  const incrementItem = useCallback((id: string) => dispatch({ type: 'INCREMENT', payload: id }), []);
+  const decrementItem = useCallback((id: string) => dispatch({ type: 'DECREMENT', payload: id }), []);
   const clearCart = useCallback(() => dispatch({ type: 'CLEAR_CART' }), []);
   const toggleCart = useCallback(() => dispatch({ type: 'TOGGLE_CART' }), []);
   const openCart = useCallback(() => dispatch({ type: 'OPEN_CART' }), []);
   const closeCart = useCallback(() => dispatch({ type: 'CLOSE_CART' }), []);
   const setStep = useCallback((step: 1 | 2) => dispatch({ type: 'SET_STEP', payload: step }), []);
+
+  const getQuantity = useCallback(
+    (id: string) => state.items.find((i) => i.id === id)?.quantity || 0,
+    [state.items]
+  );
 
   return (
     <CartContext.Provider
@@ -129,12 +142,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         ...state,
         addItem,
         removeItem,
-        updateQuantity,
+        incrementItem,
+        decrementItem,
         clearCart,
         toggleCart,
         openCart,
         closeCart,
         setStep,
+        getQuantity,
         totalItems,
         subtotal,
       }}

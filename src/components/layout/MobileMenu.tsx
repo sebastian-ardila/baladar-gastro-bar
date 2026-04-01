@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { usePathname, Link } from '@/i18n/navigation';
 import { HiOutlineX } from 'react-icons/hi';
 import { IoLanguage } from 'react-icons/io5';
@@ -22,7 +22,6 @@ interface MobileMenuProps {
 export default function MobileMenu({ isOpen, onClose, navLinks, switchLocale }: MobileMenuProps) {
   const t = useTranslations('nav');
   const tLang = useTranslations('lang');
-  const locale = useLocale();
   const pathname = usePathname();
 
   const isActive = (href: string) => {
@@ -37,9 +36,13 @@ export default function MobileMenu({ isOpen, onClose, navLinks, switchLocale }: 
     <div className="fixed inset-0 z-[60] bg-dark flex flex-col">
       <div className="flex items-center justify-between p-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-lg">B</span>
-          </div>
+          <img
+            src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/logo-company.webp`}
+            alt="Baladar Gastro Bar"
+            width={40}
+            height={40}
+            className="w-10 h-10 rounded-full"
+          />
           <span className="text-white font-bold text-xl">Baladar</span>
         </div>
         <button
@@ -69,15 +72,7 @@ export default function MobileMenu({ isOpen, onClose, navLinks, switchLocale }: 
             </span>
           );
 
-          return link.href === '/#menu' ? (
-            <a
-              key={link.labelKey}
-              href={`/${locale}/#menu`}
-              onClick={onClose}
-            >
-              {content}
-            </a>
-          ) : (
+          return (
             <Link
               key={link.labelKey}
               href={link.href}

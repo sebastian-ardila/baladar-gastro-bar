@@ -28,31 +28,29 @@ export function buildOrderMessage(
     : (isEs ? 'A domicilio' : 'Delivery');
 
   const paymentText = form.paymentMethod === 'transferencia'
-    ? (isEs ? 'Transferencia' : 'Transfer')
+    ? (isEs ? '💳 Transferencia' : '💳 Transfer')
     : form.paymentMethod === 'tarjeta'
-    ? (isEs ? 'Tarjeta' : 'Card')
-    : (isEs ? 'Efectivo' : 'Cash');
+    ? (isEs ? '💳 Tarjeta' : '💳 Card')
+    : (isEs ? '💵 Efectivo' : '💵 Cash');
 
   let msg = isEs
-    ? `🍽️ *Nuevo Pedido - Baladar Gastro Bar*\n\n`
-    : `🍽️ *New Order - Baladar Gastro Bar*\n\n`;
+    ? `🍽️ *Nuevo Pedido*\n\n`
+    : `🍽️ *New Order*\n\n`;
 
   msg += `👤 ${form.name}\n`;
   msg += `${orderTypeEmoji} ${orderTypeText}\n`;
-  msg += `💳 ${paymentText}\n\n`;
-
-  msg += isEs ? `📋 *Pedido:*\n` : `📋 *Order:*\n`;
+  msg += `${paymentText}\n\n`;
 
   items.forEach((item) => {
     const name = item.name[locale as 'es' | 'en'] || item.name.es;
     const itemTotal = item.price * item.quantity;
-    msg += `${item.emoji || '▪️'} ${item.quantity}x ${name} - ${formatPrice(itemTotal)}\n`;
+    msg += `${item.emoji || '▪️'} ${item.quantity}x ${name} ${formatPrice(itemTotal)}\n`;
     if (item.withExtra && item.extraOptionLabel) {
       const extraLabel = item.extraOptionLabel[locale as 'es' | 'en'] || item.extraOptionLabel.es;
-      msg += `   + ${extraLabel} (${formatPrice(item.extraOptionPrice! * item.quantity)})\n`;
+      msg += `  + ${extraLabel} ${formatPrice(item.extraOptionPrice! * item.quantity)}\n`;
     }
     if (item.comboSelection) {
-      msg += `   🍕 ${item.comboSelection.half1} / ${item.comboSelection.half2}\n`;
+      msg += `  🍕 ${item.comboSelection.half1} / ${item.comboSelection.half2}\n`;
     }
   });
 
@@ -70,8 +68,8 @@ export function buildReservationMessage(data: {
 }, locale: string): string {
   const isEs = locale === 'es';
   let msg = isEs
-    ? `📅 *Reserva - Baladar Gastro Bar*\n\n`
-    : `📅 *Reservation - Baladar Gastro Bar*\n\n`;
+    ? `📅 *Reserva*\n\n`
+    : `📅 *Reservation*\n\n`;
 
   msg += `👤 ${data.name}\n`;
   msg += `👥 ${data.guests} ${isEs ? 'personas' : 'guests'}\n`;
@@ -94,14 +92,14 @@ export function buildContactMessage(data: {
 }, locale: string): string {
   const isEs = locale === 'es';
   let msg = isEs
-    ? `📩 *Contacto - Baladar Gastro Bar*\n\n`
-    : `📩 *Contact - Baladar Gastro Bar*\n\n`;
+    ? `📩 *Contacto*\n\n`
+    : `📩 *Contact*\n\n`;
 
   msg += `👤 ${data.name}\n`;
   msg += `📧 ${data.email}\n`;
-  msg += `📱 ${data.phone}\n`;
-  msg += `🏷️ ${data.interest}\n`;
-  msg += `\n💬 ${data.message}`;
+  if (data.phone) msg += `📱 ${data.phone}\n`;
+  msg += `🏷️ ${data.interest}\n\n`;
+  msg += `💬 ${data.message}`;
 
   return msg;
 }

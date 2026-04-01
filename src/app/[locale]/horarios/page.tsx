@@ -13,7 +13,7 @@ export default function HorariosPage() {
   const locale = useLocale() as 'es' | 'en';
 
   return (
-    <div className="pt-28 pb-16 min-h-screen">
+    <div className="pt-24 pb-16 min-h-screen">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl sm:text-4xl font-bold text-white text-center mb-2">
           {t('title')}
@@ -28,18 +28,16 @@ export default function HorariosPage() {
               <div
                 key={i}
                 className={`bg-dark-light rounded-2xl p-6 sm:p-8 border ${
-                  isClosed ? 'border-red-900/30' : 'border-gray-800'
+                  isClosed ? 'border-gray-800/50' : 'border-gray-800'
                 } flex items-center justify-between`}
               >
                 <div className="flex items-center gap-4">
-                  <HiOutlineClock className={`w-8 h-8 ${isClosed ? 'text-red-400' : 'text-accent'}`} />
-                  <div>
-                    <h3 className="text-white font-bold text-lg sm:text-xl">
-                      {s.days[locale]}
-                    </h3>
-                  </div>
+                  <HiOutlineClock className={`w-8 h-8 ${isClosed ? 'text-gray-600' : 'text-gray-400'}`} />
+                  <h3 className="text-white font-bold text-lg sm:text-xl">
+                    {s.days[locale]}
+                  </h3>
                 </div>
-                <span className={`font-bold text-lg sm:text-xl ${isClosed ? 'text-red-400' : 'text-accent'}`}>
+                <span className={`font-bold text-lg sm:text-xl ${isClosed ? 'text-gray-600' : 'text-gray-300'}`}>
                   {s.hours[locale]}
                 </span>
               </div>
@@ -49,30 +47,31 @@ export default function HorariosPage() {
 
         {/* Location */}
         <div className="bg-dark-card rounded-2xl p-6 sm:p-8 border border-gray-800 mb-8 text-center">
-          <HiOutlineMapPin className="w-10 h-10 text-accent mx-auto mb-4" />
+          <HiOutlineMapPin className="w-10 h-10 text-gray-500 mx-auto mb-4" />
           <h3 className="text-white font-bold text-xl mb-2">{t('location')}</h3>
           <p className="text-gray-400">{restaurant.address}</p>
           <p className="text-gray-500 text-sm mt-1">({restaurant.addressSubtitle[locale]})</p>
-          <p className="text-accent font-semibold mt-4">{t('delivery')}</p>
+          <p className="text-gray-400 font-medium mt-4">{t('delivery')}</p>
         </div>
 
         {/* CTA buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/reservas">
-            <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-              {t('reserveTable')}
-            </Button>
-          </Link>
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
           <a
             href={buildWhatsAppUrl(locale === 'es' ? 'Hola! Quiero hacer un pedido' : 'Hi! I want to place an order')}
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button variant="whatsapp" size="lg" className="w-full sm:w-auto">
+            <Button size="lg">
               <FaWhatsapp className="w-5 h-5" />
               {t('orderWhatsApp')}
             </Button>
           </a>
+          <Link
+            href="/reservas"
+            className="px-6 py-3 text-base font-medium text-white/70 hover:text-white transition-all underline underline-offset-4 decoration-white/30 hover:decoration-white/70"
+          >
+            {t('reserveTable')}
+          </Link>
         </div>
       </div>
     </div>

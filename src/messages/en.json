@@ -8,8 +8,10 @@
     "contact": "Contact"
   },
   "hero": {
-    "phrase": "Local and healthy cuisine, a laboratory of experiences and great music",
-    "cta": "View our menu"
+    "line1": "Local and <green>healthy</green> cuisine",
+    "line2": "A laboratory of experiences and great music",
+    "cta": "View our menu",
+    "cta2": "Book a table"
   },
   "menu": {
     "title": "Our Menu",

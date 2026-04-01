@@ -20,8 +20,8 @@ export default function Button({
       className={cn(
         'font-semibold rounded-lg transition-all duration-300 inline-flex items-center justify-center gap-2',
         variant === 'primary' && 'bg-accent hover:bg-accent-light text-white',
-        variant === 'secondary' && 'bg-transparent border-2 border-white text-white hover:bg-white/10',
-        variant === 'whatsapp' && 'bg-[#25D366] hover:bg-[#20BD5A] text-white',
+        variant === 'secondary' && 'bg-transparent border border-gray-600 text-gray-300 hover:text-white hover:border-white',
+        variant === 'whatsapp' && 'bg-accent hover:bg-accent-light text-white',
         size === 'sm' && 'px-4 py-2 text-sm',
         size === 'md' && 'px-6 py-3 text-base',
         size === 'lg' && 'px-8 py-4 text-lg',

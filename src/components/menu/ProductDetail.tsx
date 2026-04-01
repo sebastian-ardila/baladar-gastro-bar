@@ -56,14 +56,23 @@ export default function ProductDetail({ item, onClose }: ProductDetailProps) {
           <HiOutlineX className="w-5 h-5" />
         </button>
 
-        {/* Image area - Baladar placeholder */}
-        <div className="h-48 bg-gradient-to-br from-dark-light to-dark-card flex items-center justify-center rounded-t-2xl">
-          <div className="flex flex-col items-center opacity-30">
-            <div className="w-20 h-20 border-2 border-white/40 rounded-full flex items-center justify-center mb-3">
-              <span className="text-white/60 font-bold text-3xl">B</span>
-            </div>
-            <span className="text-white/40 text-xs tracking-[0.2em] uppercase font-light">Baladar</span>
-          </div>
+        {/* Image area */}
+        <div className="h-48 bg-gradient-to-br from-dark-light to-dark-card flex items-center justify-center rounded-t-2xl overflow-hidden">
+          {item.image ? (
+            <img
+              src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}${item.image}`}
+              alt={item.name[locale]}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <img
+              src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/logo-company.webp`}
+              alt="Baladar"
+              width={80}
+              height={80}
+              className="w-20 h-20 rounded-full opacity-30"
+            />
+          )}
         </div>
 
         {/* Content */}

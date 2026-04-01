@@ -93,7 +93,7 @@ export default function ContactForm() {
         />
       </div>
 
-      <Button type="submit" variant="whatsapp" className="w-full" size="lg" disabled={!isValid}>
+      <Button type="submit" className="w-full" size="lg" disabled={!isValid}>
         <FaWhatsapp className="w-5 h-5" />
         {t('submit')}
       </Button>

@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { usePathname, useRouter, Link } from '@/i18n/navigation';
 import { useCart } from '@/context/CartContext';
-import { HiOutlineShoppingCart, HiOutlineMenu, HiOutlineX } from 'react-icons/hi';
+import { HiOutlineShoppingCart, HiOutlineMenu } from 'react-icons/hi';
 import {
-  HiOutlineHome,
   HiOutlineBookOpen,
   HiOutlineCalendar,
   HiOutlineClock,
@@ -17,7 +16,6 @@ import { IoLanguage } from 'react-icons/io5';
 import MobileMenu from './MobileMenu';
 
 const navLinks = [
-  { href: '/', labelKey: 'home', icon: HiOutlineHome },
   { href: '/#menu', labelKey: 'menu', icon: HiOutlineBookOpen },
   { href: '/reservas', labelKey: 'reservations', icon: HiOutlineCalendar },
   { href: '/horarios', labelKey: 'schedule', icon: HiOutlineClock },
@@ -33,6 +31,19 @@ export default function Navbar() {
   const router = useRouter();
   const { totalItems, openCart } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  useEffect(() => {
+    const el = document.getElementById('menu');
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setMenuVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [pathname]);
 
   const switchLocale = () => {
     const newLocale = locale === 'es' ? 'en' : 'es';
@@ -40,60 +51,62 @@ export default function Navbar() {
   };
 
   const isActive = (href: string) => {
+    if (href === '/#menu') return menuVisible && pathname === '/';
     if (href === '/') return pathname === '/';
-    if (href === '/#menu') return pathname === '/' && typeof window !== 'undefined' && window.location.hash === '#menu';
     return pathname.startsWith(href);
   };
 
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
+  const linkClass = (active: boolean) =>
+    `relative flex items-center gap-1.5 px-3 py-5 text-sm font-medium transition-colors ${
+      active
+        ? 'text-white'
+        : 'text-gray-400 hover:text-white'
+    }`;
+
+  const activeBar = <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-emerald-500" />;
+
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-dark/95 backdrop-blur-md border-b border-gray-800/50">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-dark/95 backdrop-blur-md border-b border-gray-800/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 shrink-0">
-              <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">B</span>
-              </div>
-              <span className="text-white font-bold text-lg hidden sm:block">Baladar</span>
+            <Link href="/" className="shrink-0">
+              <img
+                src={`${basePath}/logo-company-mini.webp`}
+                alt="Baladar Gastro Bar"
+                width={40}
+                height={40}
+                className="h-10 w-auto nav-logo"
+              />
             </Link>
 
             {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center h-14">
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 const active = isActive(link.href);
-                return link.href === '/#menu' ? (
-                  <a
-                    key={link.labelKey}
-                    href={`/${locale}/#menu`}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      active ? 'text-accent border-b-2 border-accent' : 'text-gray-300 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {t(link.labelKey)}
-                  </a>
-                ) : (
+                return (
                   <Link
                     key={link.labelKey}
                     href={link.href}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      active ? 'text-accent border-b-2 border-accent' : 'text-gray-300 hover:text-white hover:bg-white/5'
-                    }`}
+                    className={linkClass(active)}
                   >
                     <Icon className="w-4 h-4" />
                     {t(link.labelKey)}
+                    {active && activeBar}
                   </Link>
                 );
               })}
             </div>
 
             {/* Right actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <button
                 onClick={switchLocale}
-                className="flex items-center gap-1 px-3 py-2 text-sm text-gray-300 hover:text-white transition-colors"
+                className="flex items-center gap-1 px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors"
                 aria-label="Switch language"
               >
                 <IoLanguage className="w-4 h-4" />
@@ -102,12 +115,12 @@ export default function Navbar() {
 
               <button
                 onClick={openCart}
-                className="relative p-2 text-gray-300 hover:text-white transition-colors"
+                className="relative p-2 text-gray-400 hover:text-white transition-colors"
                 aria-label="Cart"
               >
-                <HiOutlineShoppingCart className="w-6 h-6" />
+                <HiOutlineShoppingCart className="w-5 h-5" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-accent text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  <span className="absolute -top-0.5 -right-0.5 bg-white text-dark text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                     {totalItems}
                   </span>
                 )}
@@ -115,10 +128,10 @@ export default function Navbar() {
 
               <button
                 onClick={() => setMobileOpen(true)}
-                className="lg:hidden p-2 text-gray-300 hover:text-white transition-colors"
+                className="lg:hidden p-2 text-gray-400 hover:text-white transition-colors"
                 aria-label="Open menu"
               >
-                <HiOutlineMenu className="w-6 h-6" />
+                <HiOutlineMenu className="w-5 h-5" />
               </button>
             </div>
           </div>

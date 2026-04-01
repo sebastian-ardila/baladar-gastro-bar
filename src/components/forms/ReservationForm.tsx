@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { buildReservationMessage, buildWhatsAppUrl } from '@/lib/whatsapp';
 import { FaWhatsapp } from 'react-icons/fa';
+import { HiPlus, HiMinus } from 'react-icons/hi';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
@@ -19,6 +20,8 @@ export default function ReservationForm() {
     comments: '',
   });
 
+  const guestsNum = parseInt(form.guests) || 1;
+
   const isValid = form.name.trim() && form.date && form.time;
 
   const timeOptions = [
@@ -29,13 +32,6 @@ export default function ReservationForm() {
       const ampm = hour >= 12 ? 'PM' : 'AM';
       return { value: `${h}:00 ${ampm}`, label: `${h}:00 ${ampm}` };
     }),
-  ];
-
-  const guestOptions = [
-    ...Array.from({ length: 20 }, (_, i) => ({
-      value: String(i + 1),
-      label: String(i + 1),
-    })),
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -57,13 +53,30 @@ export default function ReservationForm() {
         required
       />
 
-      <Select
-        label={t('guests')}
-        id="res-guests"
-        options={guestOptions}
-        value={form.guests}
-        onChange={(e) => setForm({ ...form, guests: e.target.value })}
-      />
+      {/* Guests counter */}
+      <div className="w-full">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          {t('guests')}
+        </label>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, guests: String(Math.max(1, guestsNum - 1)) })}
+            className="w-10 h-10 rounded-lg bg-dark border border-gray-700 flex items-center justify-center text-white hover:border-accent transition-colors"
+          >
+            <HiMinus className="w-4 h-4" />
+          </button>
+          <span className="text-white font-bold text-xl w-8 text-center">{guestsNum}</span>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, guests: String(Math.min(20, guestsNum + 1)) })}
+            className="w-10 h-10 rounded-lg bg-dark border border-gray-700 flex items-center justify-center text-white hover:border-accent transition-colors"
+          >
+            <HiPlus className="w-4 h-4" />
+          </button>
+          <span className="text-gray-500 text-sm">{guestsNum === 1 ? 'persona' : 'personas'}</span>
+        </div>
+      </div>
 
       <Input
         label={t('date')}
@@ -97,7 +110,7 @@ export default function ReservationForm() {
         />
       </div>
 
-      <Button type="submit" variant="whatsapp" className="w-full" size="lg" disabled={!isValid}>
+      <Button type="submit" className="w-full" size="lg" disabled={!isValid}>
         <FaWhatsapp className="w-5 h-5" />
         {t('submit')}
       </Button>
