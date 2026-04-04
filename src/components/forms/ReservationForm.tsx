@@ -106,7 +106,7 @@ export default function ReservationForm() {
           placeholder={t('commentsPlaceholder')}
           value={form.comments}
           onChange={(e) => setForm({ ...form, comments: e.target.value })}
-          className="w-full bg-dark-light border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-base resize-none"
+          className="w-full bg-dark-light border border-gray-700 rounded-lg px-3 sm:px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-base resize-none"
         />
       </div>
 
