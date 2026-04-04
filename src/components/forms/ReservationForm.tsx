@@ -194,10 +194,17 @@ export default function ReservationForm() {
 
       {/* Submit */}
       <div>
-        <Button type="submit" className="w-full" size="lg" disabled={!isValid}>
+        <button
+          type="submit"
+          className={`w-full font-semibold rounded-lg transition-all duration-300 inline-flex items-center justify-center gap-2 px-8 py-4 text-lg ${
+            isValid
+              ? 'bg-accent hover:bg-accent-light text-white'
+              : 'bg-accent/30 text-white/40 cursor-not-allowed'
+          }`}
+        >
           <FaWhatsapp className="w-5 h-5" />
           {t('submit')}
-        </Button>
+        </button>
         {tried && !isValid && (
           <p className="text-white/30 text-xs text-center mt-2">
             {isEs ? 'Completa los campos requeridos' : 'Fill in the required fields'}

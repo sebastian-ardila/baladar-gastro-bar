@@ -152,11 +152,10 @@ export default function CartStep2() {
       <div className="px-5 pb-5 pt-3">
         <button
           onClick={handleSend}
-          disabled={!isValid}
           className={`w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
             isValid
               ? 'bg-accent hover:bg-accent-light text-white'
-              : 'bg-white/5 text-white/20 cursor-not-allowed'
+              : 'bg-accent/30 text-white/40 cursor-not-allowed'
           }`}
         >
           <FaWhatsapp className="w-4 h-4" />
