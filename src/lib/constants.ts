@@ -13,3 +13,8 @@ export function getAssetPath(path: string): string {
 export function isLocale(value: string): value is Locale {
   return value === 'es' || value === 'en';
 }
+
+/** Get the scroll container element (used instead of window for scrolling) */
+export function getScrollRoot(): HTMLElement {
+  return document.getElementById('scroll-root') || document.documentElement;
+}

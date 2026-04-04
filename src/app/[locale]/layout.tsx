@@ -32,15 +32,20 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <body className="bg-dark text-white font-sans min-h-screen flex flex-col">
+      <body className="bg-dark text-white font-sans h-[100dvh] overflow-hidden flex flex-col">
         <NextIntlClientProvider messages={messages}>
           <CartProvider>
-            <div className="sticky top-0 z-50">
-              <Navbar />
-              <Breadcrumb />
+            {/* Navbar outside scroll container — always visible */}
+            <Navbar />
+            <Breadcrumb />
+
+            {/* Scroll container — Chrome mobile can't hide the navbar because
+                scrolling happens inside this div, not on the document */}
+            <div id="scroll-root" className="flex-1 overflow-y-auto">
+              <main>{children}</main>
+              <Footer />
             </div>
-            <main className="flex-1">{children}</main>
-            <Footer />
+
             <FloatingCartBadge />
             <CartDrawer />
           </CartProvider>

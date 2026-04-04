@@ -37,11 +37,12 @@ export default function Navbar() {
 
   useEffect(() => {
     const el = document.getElementById('menu');
+    const scrollRoot = document.getElementById('scroll-root');
     if (!el) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => setMenuVisible(entry.isIntersecting),
-      { threshold: 0.1 }
+      { threshold: 0.1, root: scrollRoot }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -63,7 +64,13 @@ export default function Navbar() {
     if (pathname === '/') {
       e.preventDefault();
       const el = document.getElementById('menu');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      if (el) {
+        const scrollRoot = document.getElementById('scroll-root');
+        if (scrollRoot) {
+          const top = el.getBoundingClientRect().top + scrollRoot.scrollTop - 56;
+          scrollRoot.scrollTo({ top, behavior: 'smooth' });
+        }
+      }
     }
     // Otherwise, the <a> tag navigates to /{locale}/#menu (full reload)
   };

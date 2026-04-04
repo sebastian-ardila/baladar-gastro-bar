@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useTypedLocale } from '@/hooks/useTypedLocale';
-import { getAssetPath, SCROLL_OFFSET } from '@/lib/constants';
+import { getAssetPath, SCROLL_OFFSET, getScrollRoot } from '@/lib/constants';
 import { getLocalePath } from '@/lib/navigation';
 import { restaurant } from '@/data/restaurant';
 import { HiOutlineMapPin } from 'react-icons/hi2';
@@ -15,8 +15,9 @@ export default function HeroSection() {
   const handleScroll = () => {
     const el = document.getElementById('menu');
     if (el) {
-      const top = el.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET;
-      window.scrollTo({ top, behavior: 'smooth' });
+      const scrollRoot = getScrollRoot();
+      const top = el.getBoundingClientRect().top + scrollRoot.scrollTop - SCROLL_OFFSET;
+      scrollRoot.scrollTo({ top, behavior: 'smooth' });
     }
   };
 

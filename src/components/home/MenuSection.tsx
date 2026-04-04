@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useTypedLocale } from '@/hooks/useTypedLocale';
 import { categories, menuItems, vegetarianItemIds } from '@/data/menu';
 import { Category } from '@/types/menu';
-import { NAVBAR_HEIGHT } from '@/lib/constants';
+import { NAVBAR_HEIGHT, getScrollRoot } from '@/lib/constants';
 import CategoryTabs, { categoryIcons } from '@/components/menu/CategoryTabs';
 import ProductCard from '@/components/menu/ProductCard';
 
@@ -39,7 +39,7 @@ export default function MenuSection() {
 
   /* ── 1. IntersectionObserver — detect active category ── */
   useEffect(() => {
-    const offset = NAVBAR_HEIGHT + 160;
+    const offset = 160; // navbar is outside scroll container, no need to account for it
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -50,7 +50,7 @@ export default function MenuSection() {
           }
         }
       },
-      { rootMargin: `-${offset}px 0px -60% 0px`, threshold: 0 },
+      { rootMargin: `-${offset}px 0px -60% 0px`, threshold: 0, root: getScrollRoot() },
     );
 
     allCatIds.forEach((id) => {
@@ -63,17 +63,18 @@ export default function MenuSection() {
 
   /* ── 2. Clear active when not in the menu zone ── */
   useEffect(() => {
+    const scrollRoot = getScrollRoot();
     const onScroll = () => {
       if (isScrollingRef.current) return;
       const bar = stickyBarRef.current;
       if (!bar) return;
-      const isStuck = bar.getBoundingClientRect().top <= NAVBAR_HEIGHT + 1;
+      const isStuck = bar.getBoundingClientRect().top <= 1;
       if (!isStuck) setActiveCategory(null);
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); // check on mount (page refresh with scroll restored)
-    return () => window.removeEventListener('scroll', onScroll);
+    scrollRoot.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => scrollRoot.removeEventListener('scroll', onScroll);
   }, []);
 
   /* ── 3. Click category → scroll to section ── */
@@ -83,9 +84,10 @@ export default function MenuSection() {
 
     const el = document.getElementById(`cat-${category}`);
     if (el) {
+      const scrollRoot = getScrollRoot();
       const fixedH = stickyBarRef.current?.offsetHeight ?? 80;
-      const y = el.getBoundingClientRect().top + window.scrollY - NAVBAR_HEIGHT - fixedH - 16;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+      const y = el.getBoundingClientRect().top + scrollRoot.scrollTop - fixedH - 16;
+      scrollRoot.scrollTo({ top: y, behavior: 'smooth' });
     }
 
     setTimeout(() => {
@@ -104,7 +106,7 @@ export default function MenuSection() {
         {/* Sticky category bar */}
         <div
           ref={stickyBarRef}
-          className="sticky top-14 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-dark border-b border-gray-800/40"
+          className="sticky top-0 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-dark border-b border-gray-800/40"
         >
           <CategoryTabs activeCategory={activeCategory} onSelect={scrollToCategory} />
         </div>
