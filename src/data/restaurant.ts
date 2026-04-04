@@ -28,6 +28,9 @@ export const restaurant = {
     es: 'Porque creemos en el consumo responsable y consciente, todos nuestros ingredientes son de origen local',
     en: 'Because we believe in responsible and conscious consumption, all our ingredients are locally sourced',
   },
+  mapsUrl: 'https://www.google.com/maps/search/?api=1&query=Baladar+Gastro+Bar+Pereira',
+  wazeUrl: 'https://waze.com/ul?q=Baladar+Gastro+Bar+Pereira',
+  appleMapsUrl: 'https://maps.apple.com/?q=Baladar+Gastro+Bar+Pereira',
   schedule: [
     {
       days: { es: 'Lunes a Viernes', en: 'Monday to Friday' },

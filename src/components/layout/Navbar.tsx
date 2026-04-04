@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import { usePathname, useRouter, Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { useTypedLocale } from '@/hooks/useTypedLocale';
+import { usePathname } from '@/i18n/navigation';
 import { useCart } from '@/context/CartContext';
+import { getAssetPath } from '@/lib/constants';
+import { getLocalePath } from '@/lib/navigation';
 import { HiOutlineShoppingCart, HiOutlineMenu } from 'react-icons/hi';
 import {
   HiOutlineBookOpen,
@@ -17,18 +20,17 @@ import MobileMenu from './MobileMenu';
 
 const navLinks = [
   { href: '/#menu', labelKey: 'menu', icon: HiOutlineBookOpen },
-  { href: '/reservas', labelKey: 'reservations', icon: HiOutlineCalendar },
-  { href: '/horarios', labelKey: 'schedule', icon: HiOutlineClock },
-  { href: '/historia', labelKey: 'history', icon: HiOutlineHeart },
-  { href: '/contacto', labelKey: 'contact', icon: HiOutlineEnvelope },
+  { href: '/reservas/', labelKey: 'reservations', icon: HiOutlineCalendar },
+  { href: '/horarios/', labelKey: 'schedule', icon: HiOutlineClock },
+  { href: '/historia/', labelKey: 'history', icon: HiOutlineHeart },
+  { href: '/contacto/', labelKey: 'contact', icon: HiOutlineEnvelope },
 ];
 
 export default function Navbar() {
   const t = useTranslations('nav');
   const tLang = useTranslations('lang');
-  const locale = useLocale();
+  const locale = useTypedLocale();
   const pathname = usePathname();
-  const router = useRouter();
   const { totalItems, openCart } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -47,16 +49,29 @@ export default function Navbar() {
 
   const switchLocale = () => {
     const newLocale = locale === 'es' ? 'en' : 'es';
-    router.replace(pathname, { locale: newLocale });
+    window.location.href = getLocalePath(pathname === '/' ? '/' : `${pathname}/`, newLocale);
   };
 
   const isActive = (href: string) => {
     if (href === '/#menu') return menuVisible && pathname === '/';
     if (href === '/') return pathname === '/';
-    return pathname.startsWith(href);
+    return pathname.startsWith(href.replace(/\/$/, ''));
   };
 
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  // /#menu is a hash link on the home page — handle with scroll if already on home
+  const handleMenuClick = (e: React.MouseEvent) => {
+    if (pathname === '/') {
+      e.preventDefault();
+      const el = document.getElementById('menu');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+    // Otherwise, the <a> tag navigates to /{locale}/#menu (full reload)
+  };
+
+  const getHref = (href: string) => {
+    if (href === '/#menu') return getLocalePath('/', locale) + '#menu';
+    return getLocalePath(href, locale);
+  };
 
   const linkClass = (active: boolean) =>
     `relative flex items-center gap-1.5 px-3 py-5 text-sm font-medium transition-colors ${
@@ -73,15 +88,15 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Logo */}
-            <Link href="/" className="shrink-0">
+            <a href={getLocalePath('/', locale)} className="shrink-0">
               <img
-                src={`${basePath}/logo-company-mini.webp`}
+                src={getAssetPath('/logo-company-mini.webp')}
                 alt="Baladar Gastro Bar"
                 width={40}
                 height={40}
                 className="h-10 w-auto nav-logo"
               />
-            </Link>
+            </a>
 
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center h-14">
@@ -89,15 +104,16 @@ export default function Navbar() {
                 const Icon = link.icon;
                 const active = isActive(link.href);
                 return (
-                  <Link
+                  <a
                     key={link.labelKey}
-                    href={link.href}
+                    href={getHref(link.href)}
+                    onClick={link.href === '/#menu' ? handleMenuClick : undefined}
                     className={linkClass(active)}
                   >
                     <Icon className="w-4 h-4" />
                     {t(link.labelKey)}
                     {active && activeBar}
-                  </Link>
+                  </a>
                 );
               })}
             </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useTypedLocale } from '@/hooks/useTypedLocale';
 import { buildWhatsAppUrl } from '@/lib/whatsapp';
 import { HiOutlineX } from 'react-icons/hi';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -11,7 +11,7 @@ interface LunchOrderModalProps {
 }
 
 export default function LunchOrderModal({ onClose }: LunchOrderModalProps) {
-  const locale = useLocale() as 'es' | 'en';
+  const locale = useTypedLocale();
   const isEs = locale === 'es';
 
   const [name, setName] = useState('');
@@ -45,14 +45,19 @@ export default function LunchOrderModal({ onClose }: LunchOrderModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/80" />
+    <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
       <div
-        className="relative bg-dark rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl"
+        className="relative bg-dark rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm overflow-hidden shadow-2xl sm:mx-4"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Drag handle — mobile */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-white/20" />
+        </div>
+
         {/* Header */}
-        <div className="px-6 pt-6 pb-4 flex items-center justify-between">
+        <div className="px-6 pt-4 sm:pt-6 pb-4 flex items-center justify-between">
           <h3 className="text-white font-bold text-lg">
             {isEs ? 'Pedir Almuerzo' : 'Order Lunch'}
           </h3>

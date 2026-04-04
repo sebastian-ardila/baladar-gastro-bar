@@ -10,7 +10,8 @@ export type Category =
   | 'bebidas-frias'
   | 'comidas'
   | 'postres'
-  | 'almuerzos';
+  | 'almuerzos'
+  | 'vegetariano';
 
 export interface MenuItem {
   id: string;

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useTypedLocale } from '@/hooks/useTypedLocale';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/utils';
 import { buildOrderMessage, buildWhatsAppUrl } from '@/lib/whatsapp';
@@ -10,7 +11,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 
 export default function CartStep2() {
   const t = useTranslations('cart');
-  const locale = useLocale() as 'es' | 'en';
+  const locale = useTypedLocale();
   const { items, subtotal, setStep } = useCart();
 
   const [form, setForm] = useState<OrderForm>({

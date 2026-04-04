@@ -1,15 +1,16 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { useTypedLocale } from '@/hooks/useTypedLocale';
 import { restaurant } from '@/data/restaurant';
+import { getAssetPath } from '@/lib/constants';
+import { getLocalePath } from '@/lib/navigation';
 import { FaInstagram, FaWhatsapp } from 'react-icons/fa';
 import { HiOutlineEnvelope, HiOutlineMapPin } from 'react-icons/hi2';
 
 export default function Footer() {
   const t = useTranslations('footer');
-  const locale = useLocale() as 'es' | 'en';
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const locale = useTypedLocale();
 
   return (
     <footer className="bg-dark-light/30">
@@ -22,15 +23,15 @@ export default function Footer() {
 
           {/* Brand column */}
           <div className="lg:col-span-1">
-            <Link href="/">
+            <a href={getLocalePath('/', locale)}>
               <img
-                src={`${basePath}/logo-company-2.webp`}
+                src={getAssetPath('/logo-company-2.webp')}
                 alt="Baladar Gastro Bar"
                 width={140}
                 height={50}
                 className="h-14 w-auto mb-5 opacity-90 hover:opacity-100 transition-opacity"
               />
-            </Link>
+            </a>
             <div className="flex items-start gap-2 mb-2">
               <HiOutlineMapPin className="w-4 h-4 mt-0.5 shrink-0 text-white/20" />
               <p className="text-white/40 text-sm leading-relaxed">
@@ -73,19 +74,24 @@ export default function Footer() {
             <nav className="space-y-3">
               {[
                 { href: '/#menu', label: locale === 'es' ? 'Nuestra Carta' : 'Our Menu' },
-                { href: '/reservas', label: locale === 'es' ? 'Reservar Mesa' : 'Book a Table' },
-                { href: '/horarios', label: locale === 'es' ? 'Horarios' : 'Hours' },
-                { href: '/historia', label: locale === 'es' ? 'Historia' : 'Our Story' },
-                { href: '/contacto', label: locale === 'es' ? 'Contacto' : 'Contact' },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="block text-white/35 text-sm hover:text-white/70 transition-colors"
-                >
-                  {item.label}
-                </Link>
-              ))}
+                { href: '/reservas/', label: locale === 'es' ? 'Reservar Mesa' : 'Book a Table' },
+                { href: '/horarios/', label: locale === 'es' ? 'Horarios' : 'Hours' },
+                { href: '/historia/', label: locale === 'es' ? 'Historia' : 'Our Story' },
+                { href: '/contacto/', label: locale === 'es' ? 'Contacto' : 'Contact' },
+              ].map((item) => {
+                const url = item.href === '/#menu'
+                  ? getLocalePath('/', locale) + '#menu'
+                  : getLocalePath(item.href, locale);
+                return (
+                  <a
+                    key={item.href}
+                    href={url}
+                    className="block text-white/35 text-sm hover:text-white/70 transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
             </nav>
           </div>
 

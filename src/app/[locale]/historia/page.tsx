@@ -1,16 +1,18 @@
-'use client';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import PageCTA from '@/components/ui/PageCTA';
 
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
-import { HiOutlineBookOpen } from 'react-icons/hi2';
-import Button from '@/components/ui/Button';
-
-export default function HistoriaPage() {
-  const t = useTranslations('history');
+export default async function HistoriaPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations('history');
 
   return (
     <div className="pt-28 pb-16 min-h-screen">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl sm:text-4xl font-bold text-white text-center mb-10">
           {t('title')}
         </h1>
@@ -20,10 +22,18 @@ export default function HistoriaPage() {
             <p className="text-gray-300 text-lg leading-relaxed">{t('p1')}</p>
           </div>
 
-          <div className="bg-dark-card rounded-2xl p-6 sm:p-8 border border-accent/20">
-            <p className="text-accent italic text-xl font-medium text-center leading-relaxed">
-              &ldquo;{t('tagline')}&rdquo;
-            </p>
+          <div className="rounded-2xl overflow-hidden border border-accent/20 relative">
+            <img
+              src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80&auto=format&fit=crop"
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-dark/85" />
+            <div className="relative py-12 sm:py-16 px-8 sm:px-12 text-center">
+              <p className="text-emerald-400/80 italic text-2xl sm:text-3xl font-semibold leading-relaxed drop-shadow-lg">
+                &ldquo;{t('tagline')}&rdquo;
+              </p>
+            </div>
           </div>
 
           <div className="bg-dark-light rounded-2xl p-6 sm:p-8 border border-gray-800">
@@ -39,14 +49,11 @@ export default function HistoriaPage() {
           </div>
         </div>
 
-        {/* CTA Card */}
-        <div className="bg-gradient-to-br from-accent/20 to-dark-card rounded-2xl p-8 sm:p-10 border border-accent/30 text-center">
-          <HiOutlineBookOpen className="w-12 h-12 text-accent mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-white mb-4">{t('cta')}</h3>
-          <Link href="/#menu">
-            <Button size="lg">{t('cta')}</Button>
-          </Link>
-        </div>
+        <PageCTA
+          locale={locale}
+          secondaryLabel={locale === 'es' ? 'Reservar' : 'Book a table'}
+          secondaryHref="/reservas/"
+        />
       </div>
     </div>
   );

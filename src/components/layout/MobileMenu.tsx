@@ -1,7 +1,10 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { usePathname, Link } from '@/i18n/navigation';
+import { useTypedLocale } from '@/hooks/useTypedLocale';
+import { usePathname } from '@/i18n/navigation';
+import { getAssetPath } from '@/lib/constants';
+import { getLocalePath } from '@/lib/navigation';
 import { HiOutlineX } from 'react-icons/hi';
 import { IoLanguage } from 'react-icons/io5';
 import { IconType } from 'react-icons';
@@ -23,11 +26,17 @@ export default function MobileMenu({ isOpen, onClose, navLinks, switchLocale }: 
   const t = useTranslations('nav');
   const tLang = useTranslations('lang');
   const pathname = usePathname();
+  const locale = useTypedLocale();
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
     if (href === '/#menu') return false;
-    return pathname.startsWith(href);
+    return pathname.startsWith(href.replace(/\/$/, ''));
+  };
+
+  const getHref = (href: string) => {
+    if (href === '/#menu') return getLocalePath('/', locale) + '#menu';
+    return getLocalePath(href, locale);
   };
 
   if (!isOpen) return null;
@@ -37,7 +46,7 @@ export default function MobileMenu({ isOpen, onClose, navLinks, switchLocale }: 
       <div className="flex items-center justify-between p-6">
         <div className="flex items-center gap-3">
           <img
-            src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/logo-company.webp`}
+            src={getAssetPath('/logo-company.webp')}
             alt="Baladar Gastro Bar"
             width={40}
             height={40}
@@ -59,8 +68,11 @@ export default function MobileMenu({ isOpen, onClose, navLinks, switchLocale }: 
           const Icon = link.icon;
           const active = isActive(link.href);
 
-          const content = (
-            <span
+          return (
+            <a
+              key={link.labelKey}
+              href={getHref(link.href)}
+              onClick={onClose}
               className={`flex items-center gap-4 px-6 py-5 rounded-xl text-xl font-semibold transition-colors ${
                 active
                   ? 'text-accent bg-accent/10 border-l-4 border-accent'
@@ -69,17 +81,7 @@ export default function MobileMenu({ isOpen, onClose, navLinks, switchLocale }: 
             >
               <Icon className="w-7 h-7" />
               {t(link.labelKey)}
-            </span>
-          );
-
-          return (
-            <Link
-              key={link.labelKey}
-              href={link.href}
-              onClick={onClose}
-            >
-              {content}
-            </Link>
+            </a>
           );
         })}
       </nav>

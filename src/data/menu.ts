@@ -1,10 +1,41 @@
 import { MenuItem, CategoryInfo } from '@/types/menu';
 
+// IDs de productos vegetarianos (aparecen en múltiples categorías)
+export const vegetarianItemIds: string[] = [
+  // Pizzas
+  'pizza-margarita-p', 'pizza-margarita-m',
+  'pizza-margarita-huevo-p', 'pizza-margarita-huevo-m',
+  'pizza-vegetales-p', 'pizza-vegetales-m',
+  'pizza-apple-blue-p', 'pizza-apple-blue-m',
+  'pizza-hongos-p', 'pizza-hongos-m',
+  // Comidas
+  'quesadilla-margarita', 'quesadilla-apple-blue',
+  'montaditos-hongos', 'montaditos-napolitanos',
+  'nachos-queso',
+  // Postres
+  'pringles', 'brownie-helado', 'torta-chocolate', 'postre-especial',
+  // Bebidas frías (todas son vegetarianas, seleccionamos las más relevantes)
+  'limonada-frutos-rojos', 'limonada-hierbabuena', 'limonada-cereza',
+  'limonada-cafe', 'limonada-mango-biche', 'limonada-natural',
+  'soda-frutos-rojos', 'soda-frutos-amarillos',
+  'jugo-guanabana', 'jugo-mango', 'jugo-fresa',
+  // Calientes
+  'americano', 'capuchino', 'capuchino-vainilla', 'mocaccino',
+  'latte-caliente', 'latte-frio', 'expreso-caliente', 'expreso-frio',
+  'affogato', 'baladar-orange-coffee', 'expreso-tonic',
+  'chocolate-organico', 'chocolate-organico-leche', 'chocolate-organico-queso', 'chocolate-organico-leche-queso',
+  'te-chai-frio', 'te-chai-caliente', 'milo-caliente', 'milo-frio',
+  'infusion-frutos-rojos', 'infusion-frutos-amarillos',
+  'aromatica-frutos-deshidratados', 'aromatica-bolsita', 'aromatica-panela-cbd',
+];
+
+// Order matches CategoryTabs selector
 export const categories: CategoryInfo[] = [
   { id: 'almuerzos', name: { es: 'Almuerzos Baladar', en: 'Baladar Lunch' }, emoji: '🥘' },
   { id: 'comidas', name: { es: 'Comidas', en: 'Food' }, emoji: '🍽️' },
   { id: 'pizzas', name: { es: 'Pizzas', en: 'Pizzas' }, emoji: '🍕' },
   { id: 'pizzas-especiales', name: { es: 'Pizzas Especiales', en: 'Special Pizzas' }, emoji: '⭐' },
+  { id: 'postres', name: { es: 'Postres', en: 'Desserts' }, emoji: '🍰' },
   { id: 'calientes', name: { es: 'Calientes', en: 'Hot Drinks' }, emoji: '☕' },
   { id: 'cockteles', name: { es: 'Cócteles', en: 'Cocktails' }, emoji: '🍸' },
   { id: 'cervezas-barril', name: { es: 'Cervezas de Barril', en: 'Draft Beers' }, emoji: '🍺' },
@@ -12,7 +43,7 @@ export const categories: CategoryInfo[] = [
   { id: 'cervezas-artesanales', name: { es: 'Cervezas Artesanales', en: 'Craft Beers' }, emoji: '🏔️' },
   { id: 'licores-vinos', name: { es: 'Licores y Vinos', en: 'Spirits & Wine' }, emoji: '🍷' },
   { id: 'bebidas-frias', name: { es: 'Bebidas Frías', en: 'Cold Drinks' }, emoji: '🧊' },
-  { id: 'postres', name: { es: 'Postres', en: 'Desserts' }, emoji: '🍰' },
+  { id: 'vegetariano', name: { es: 'Vegetariano', en: 'Vegetarian' }, emoji: '🥬' },
 ];
 
 export const menuItems: MenuItem[] = [

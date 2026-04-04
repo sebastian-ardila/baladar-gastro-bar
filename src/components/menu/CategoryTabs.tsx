@@ -1,10 +1,10 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
+import { useEffect, useRef } from 'react';
+import { useTypedLocale } from '@/hooks/useTypedLocale';
 import { Category } from '@/types/menu';
 import { IconType } from 'react-icons';
 import {
-  PiGridFourFill,
   PiCookingPotFill,
   PiHamburgerFill,
   PiPizzaFill,
@@ -17,29 +17,30 @@ import {
   PiMountainsFill,
   PiWineFill,
   PiSnowflakeFill,
+  PiLeafFill,
 } from 'react-icons/pi';
 
+/* ── Types ── */
+
 interface CategoryTabsProps {
-  activeCategory: Category | 'all';
-  onSelect: (category: Category | 'all') => void;
+  activeCategory: Category | null;
+  onSelect: (category: Category) => void;
 }
 
-interface CategoryButton {
-  id: Category | 'all';
+interface Tab {
+  id: Category;
   label: { es: string; en: string };
   icon: IconType;
 }
 
-const foodCategories: CategoryButton[] = [
-  { id: 'all', label: { es: 'Todas', en: 'All' }, icon: PiGridFourFill },
+/* ── Data ── */
+
+const tabs: Tab[] = [
   { id: 'almuerzos', label: { es: 'Almuerzos', en: 'Lunch' }, icon: PiCookingPotFill },
   { id: 'comidas', label: { es: 'Comidas', en: 'Food' }, icon: PiHamburgerFill },
   { id: 'pizzas', label: { es: 'Pizzas', en: 'Pizzas' }, icon: PiPizzaFill },
   { id: 'pizzas-especiales', label: { es: 'Especiales', en: 'Special' }, icon: PiStarFill },
   { id: 'postres', label: { es: 'Postres', en: 'Desserts' }, icon: PiIceCreamFill },
-];
-
-const drinkCategories: CategoryButton[] = [
   { id: 'calientes', label: { es: 'Calientes', en: 'Hot' }, icon: PiCoffeeFill },
   { id: 'cockteles', label: { es: 'Cócteles', en: 'Cocktails' }, icon: PiMartiniFill },
   { id: 'cervezas-barril', label: { es: 'De Barril', en: 'Draft' }, icon: PiBeerSteinFill },
@@ -47,51 +48,63 @@ const drinkCategories: CategoryButton[] = [
   { id: 'cervezas-artesanales', label: { es: 'Artesanales', en: 'Craft' }, icon: PiMountainsFill },
   { id: 'licores-vinos', label: { es: 'Licores', en: 'Spirits' }, icon: PiWineFill },
   { id: 'bebidas-frias', label: { es: 'Frías', en: 'Cold' }, icon: PiSnowflakeFill },
+  { id: 'vegetariano', label: { es: 'Vegetariano', en: 'Vegetarian' }, icon: PiLeafFill },
 ];
 
-function CategoryButton({
-  item,
-  active,
-  onSelect,
-  locale,
-}: {
-  item: CategoryButton;
-  active: boolean;
-  onSelect: (id: Category | 'all') => void;
-  locale: 'es' | 'en';
-}) {
-  const Icon = item.icon;
-  return (
-    <button
-      onClick={() => onSelect(item.id)}
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-        active
-          ? 'bg-accent text-white'
-          : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
-      }`}
-    >
-      <Icon className="w-3.5 h-3.5 shrink-0" />
-      {item.label[locale]}
-    </button>
-  );
-}
+/* ── Component ── */
 
 export default function CategoryTabs({ activeCategory, onSelect }: CategoryTabsProps) {
-  const locale = useLocale() as 'es' | 'en';
+  const locale = useTypedLocale();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const btnMap = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-  const allCategories = [...foodCategories, ...drinkCategories];
+  // Keep the active button scrolled into view
+  useEffect(() => {
+    if (!activeCategory) return;
+    const btn = btnMap.current.get(activeCategory);
+    if (!btn || !containerRef.current) return;
+
+    const bRect = btn.getBoundingClientRect();
+    const cRect = containerRef.current.getBoundingClientRect();
+
+    if (bRect.left < cRect.left || bRect.right > cRect.right) {
+      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [activeCategory]);
 
   return (
-    <div className="flex flex-wrap gap-1.5">
-      {allCategories.map((item) => (
-        <CategoryButton
-          key={item.id}
-          item={item}
-          active={activeCategory === item.id}
-          onSelect={onSelect}
-          locale={locale}
-        />
-      ))}
+    <div ref={containerRef} className="overflow-x-auto scrollbar-hide">
+      {/* 3 rows mobile, 2 rows desktop — items flow in columns */}
+      <div className="grid grid-rows-3 sm:grid-rows-2 grid-flow-col gap-1 sm:gap-1.5 w-max">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeCategory === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              ref={(el) => {
+                if (el) btnMap.current.set(tab.id, el);
+                else btnMap.current.delete(tab.id);
+              }}
+              onClick={() => onSelect(tab.id)}
+              className={`
+                flex items-center gap-1 sm:gap-2
+                px-2 py-1.5 sm:px-3 sm:py-2
+                rounded-lg text-[10px] sm:text-xs font-medium
+                whitespace-nowrap transition-all
+                ${isActive
+                  ? 'bg-accent text-white shadow-lg shadow-accent/20'
+                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
+                }
+              `}
+            >
+              <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+              {tab.label[locale]}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

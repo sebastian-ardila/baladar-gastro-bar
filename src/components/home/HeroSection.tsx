@@ -1,18 +1,24 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import { useTypedLocale } from '@/hooks/useTypedLocale';
+import { getAssetPath, SCROLL_OFFSET } from '@/lib/constants';
+import { getLocalePath } from '@/lib/navigation';
+import { restaurant } from '@/data/restaurant';
+import { HiOutlineMapPin } from 'react-icons/hi2';
 import Button from '@/components/ui/Button';
 
 export default function HeroSection() {
   const t = useTranslations('hero');
+  const locale = useTypedLocale();
 
   const handleScroll = () => {
     const el = document.getElementById('menu');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
   };
-
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -25,7 +31,7 @@ export default function HeroSection() {
         preload="none"
         className="absolute inset-0 w-full h-full object-cover"
       >
-        <source src={`${basePath}/hero-video.webm`} type="video/webm" />
+        <source src={getAssetPath('/hero-video.webm')} type="video/webm" />
       </video>
 
       {/* Base dark tint over video */}
@@ -43,7 +49,7 @@ export default function HeroSection() {
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex flex-col items-center">
         {/* Logo */}
         <img
-          src={`${basePath}/logo-company-2.webp`}
+          src={getAssetPath('/logo-company-2.webp')}
           alt="Baladar Gastro Bar"
           width={500}
           height={500}
@@ -71,12 +77,23 @@ export default function HeroSection() {
           <Button onClick={handleScroll} size="lg">
             {t('cta')}
           </Button>
-          <Link
-            href="/reservas"
+          <a
+            href={getLocalePath('/reservas/', locale)}
             className="px-8 py-4 text-lg font-medium text-white/80 hover:text-white transition-all underline underline-offset-4 decoration-white/30 hover:decoration-white/70"
           >
             {t('cta2')}
-          </Link>
+          </a>
+        </div>
+
+        <div className="mt-6 flex items-center gap-3 text-white/25">
+          <HiOutlineMapPin className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-2 text-xs">
+            <a href={restaurant.mapsUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors">Google Maps</a>
+            <span>·</span>
+            <a href={restaurant.wazeUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors">Waze</a>
+            <span>·</span>
+            <a href={restaurant.appleMapsUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white/60 transition-colors">Apple Maps</a>
+          </div>
         </div>
       </div>
     </section>

@@ -7,6 +7,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import CartDrawer from '@/components/cart/CartDrawer';
+import FloatingCartBadge from '@/components/cart/FloatingCartBadge';
 import '../globals.css';
 
 export function generateStaticParams() {
@@ -38,6 +39,7 @@ export default async function LocaleLayout({
             <Breadcrumb />
             <main className="flex-1">{children}</main>
             <Footer />
+            <FloatingCartBadge />
             <CartDrawer />
           </CartProvider>
         </NextIntlClientProvider>

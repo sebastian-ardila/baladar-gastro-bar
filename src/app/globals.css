@@ -34,7 +34,13 @@
   transition: filter 0.3s ease;
 }
 .nav-logo:hover {
-  filter: brightness(0) saturate(100%) invert(33%) sepia(45%) saturate(500%) hue-rotate(110deg);
+  filter: brightness(0) saturate(100%) invert(70%) sepia(30%) saturate(600%) hue-rotate(110deg);
+}
+
+/* Fix native date/time input icons for dark theme */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
 }
 
 @layer components {

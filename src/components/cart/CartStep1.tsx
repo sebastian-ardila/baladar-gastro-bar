@@ -1,13 +1,14 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useTypedLocale } from '@/hooks/useTypedLocale';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/utils';
 import { HiPlus, HiMinus, HiX } from 'react-icons/hi';
 
 export default function CartStep1() {
   const t = useTranslations('cart');
-  const locale = useLocale() as 'es' | 'en';
+  const locale = useTypedLocale();
   const { items, incrementItem, decrementItem, removeItem, clearCart, setStep, subtotal, closeCart } = useCart();
 
   if (items.length === 0) {

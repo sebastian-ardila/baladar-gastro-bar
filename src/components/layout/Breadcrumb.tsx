@@ -1,7 +1,9 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { usePathname, Link } from '@/i18n/navigation';
+import { useTypedLocale } from '@/hooks/useTypedLocale';
+import { usePathname } from '@/i18n/navigation';
+import { getLocalePath } from '@/lib/navigation';
 import { HiOutlineHome, HiChevronRight } from 'react-icons/hi';
 import {
   HiOutlineCalendar,
@@ -27,8 +29,8 @@ const pageKeys: Record<string, string> = {
 export default function Breadcrumb() {
   const t = useTranslations('nav');
   const pathname = usePathname();
+  const locale = useTypedLocale();
 
-  // Don't show on home page
   if (pathname === '/' || pathname === '') return null;
 
   const segment = pathname.replace('/', '').split('/')[0];
@@ -41,15 +43,15 @@ export default function Breadcrumb() {
     <div className="fixed top-14 left-0 right-0 z-40 bg-dark/90 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 py-1.5 text-xs">
-          <Link
-            href="/"
+          <a
+            href={getLocalePath('/', locale)}
             className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors"
           >
             <HiOutlineHome className="w-4 h-4" />
             {t('home')}
-          </Link>
+          </a>
           <HiChevronRight className="w-3 h-3 text-gray-600" />
-          <span className="flex items-center gap-1 text-accent font-medium">
+          <span className="flex items-center gap-1 text-emerald-400/70 font-medium">
             {Icon && <Icon className="w-4 h-4" />}
             {t(labelKey)}
           </span>
