@@ -6,7 +6,7 @@ import { useTypedLocale } from '@/hooks/useTypedLocale';
 import { categories, menuItems, vegetarianItemIds } from '@/data/menu';
 import { Category } from '@/types/menu';
 import { NAVBAR_HEIGHT } from '@/lib/constants';
-import CategoryTabs from '@/components/menu/CategoryTabs';
+import CategoryTabs, { categoryIcons } from '@/components/menu/CategoryTabs';
 import ProductCard from '@/components/menu/ProductCard';
 import LazySection from '@/components/menu/LazySection';
 
@@ -59,13 +59,11 @@ export default function MenuSection() {
         const offset = getOffset();
         const menuRect = menu.getBoundingClientRect();
 
-        // Menu is entirely below the viewport or entirely above → deselect
         if (menuRect.bottom < offset || menuRect.top > window.innerHeight) {
           setActiveCategory(null);
           return;
         }
 
-        // Find the section whose top is closest to (but <=) the offset line
         let best: Category | null = null;
         let bestTop = -Infinity;
 
@@ -77,8 +75,6 @@ export default function MenuSection() {
           }
         }
 
-        // No section has scrolled past the header yet (still in hero/above menu)
-        // → deselect, don't pick a fallback
         if (!best) {
           setActiveCategory(null);
           return;
@@ -101,16 +97,20 @@ export default function MenuSection() {
     setActiveCategory(category);
     setScrollingTo(true);
 
+    // Double rAF: first lets React render the forced section, second measures layout
     requestAnimationFrame(() => {
-      const target = document.getElementById(`cat-${category}`);
-      if (target) {
-        const offset = getOffset();
-        const y = target.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-      }
-      setTimeout(() => setScrollingTo(false), 800);
+      requestAnimationFrame(() => {
+        const target = document.getElementById(`cat-${category}`);
+        if (target) {
+          const navbarH = NAVBAR_HEIGHT;
+          const fixedH = stickyBarEl.current?.offsetHeight ?? 80;
+          const y = target.getBoundingClientRect().top + window.scrollY - navbarH - fixedH - 16;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+        setTimeout(() => setScrollingTo(false), 1000);
+      });
     });
-  }, [getOffset]);
+  }, []);
 
   /* ── Render ── */
   return (
@@ -130,33 +130,36 @@ export default function MenuSection() {
 
         {/* Category sections */}
         <div className="mt-10 space-y-12">
-          {sections.map((section) => (
-            <LazySection
-              key={section.id}
-              minHeight={300}
-              forceRender={forced.has(section.id)}
-            >
-              <div
-                id={`cat-${section.id}`}
-                data-category={section.id}
-                ref={(el) => {
-                  if (el) sectionEls.current.set(section.id, el);
-                  else sectionEls.current.delete(section.id);
-                }}
+          {sections.map((section) => {
+            const Icon = categoryIcons[section.id];
+            return (
+              <LazySection
+                key={section.id}
+                minHeight={300}
+                forceRender={forced.has(section.id)}
               >
-                <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                  <span>{section.emoji}</span>
-                  {section.name[locale]}
-                </h3>
+                <div
+                  id={`cat-${section.id}`}
+                  data-category={section.id}
+                  ref={(el) => {
+                    if (el) sectionEls.current.set(section.id, el);
+                    else sectionEls.current.delete(section.id);
+                  }}
+                >
+                  <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                    {Icon && <Icon className="w-6 h-6 text-white/40" />}
+                    {section.name[locale]}
+                  </h3>
 
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-                  {section.items.map((item) => (
-                    <ProductCard key={item.id} item={item} />
-                  ))}
+                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                    {section.items.map((item) => (
+                      <ProductCard key={item.id} item={item} />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </LazySection>
-          ))}
+              </LazySection>
+            );
+          })}
         </div>
       </div>
     </section>

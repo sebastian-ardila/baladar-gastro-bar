@@ -35,6 +35,23 @@ interface Tab {
 
 /* ── Data ── */
 
+/** Icon map exported so other components (e.g. section headings) can reuse it */
+export const categoryIcons: Record<string, IconType> = {
+  almuerzos: PiCookingPotFill,
+  comidas: PiHamburgerFill,
+  pizzas: PiPizzaFill,
+  'pizzas-especiales': PiStarFill,
+  postres: PiIceCreamFill,
+  calientes: PiCoffeeFill,
+  cockteles: PiMartiniFill,
+  'cervezas-barril': PiBeerSteinFill,
+  cervezas: PiBeerBottleFill,
+  'cervezas-artesanales': PiMountainsFill,
+  'licores-vinos': PiWineFill,
+  'bebidas-frias': PiSnowflakeFill,
+  vegetariano: PiLeafFill,
+};
+
 const tabs: Tab[] = [
   { id: 'almuerzos', label: { es: 'Almuerzos', en: 'Lunch' }, icon: PiCookingPotFill },
   { id: 'comidas', label: { es: 'Comidas', en: 'Food' }, icon: PiHamburgerFill },
