@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { buildReservationMessage, buildWhatsAppUrl } from '@/lib/whatsapp';
 import { FaWhatsapp } from 'react-icons/fa';
@@ -26,50 +26,45 @@ function formatDateLabel(dateStr: string, locale: string): string {
   return `${dayNames[date.getDay()]} ${day} ${isEs ? 'de' : ''} ${monthNames[month - 1]}`.replace('  ', ' ');
 }
 
-interface TimeSlot {
-  value: string;
-  label: string;
-}
+interface TimeSlot { value: string; label: string }
+interface TimeGroup { name: { es: string; en: string }; emoji: string; slots: TimeSlot[] }
 
-interface TimeGroup {
-  name: { es: string; en: string };
-  emoji: string;
-  slots: TimeSlot[];
-}
+/** Generate available time slots based on selected day of week.
+ *  L-V: 11AM-9PM, Sáb/Festivos: 12PM-12AM, Dom: closed */
+function getTimeGroups(dateStr: string): TimeGroup[] {
+  if (!dateStr) return [];
 
-const timeGroups: TimeGroup[] = [
-  {
-    name: { es: 'Mañana', en: 'Morning' },
-    emoji: '☀️',
-    slots: [
-      { value: '11:00 AM', label: '11:00' },
-      { value: '12:00 PM', label: '12:00' },
-    ],
-  },
-  {
-    name: { es: 'Tarde', en: 'Afternoon' },
-    emoji: '🌤️',
-    slots: [
-      { value: '1:00 PM', label: '1:00' },
-      { value: '2:00 PM', label: '2:00' },
-      { value: '3:00 PM', label: '3:00' },
-      { value: '4:00 PM', label: '4:00' },
-      { value: '5:00 PM', label: '5:00' },
-    ],
-  },
-  {
-    name: { es: 'Noche', en: 'Evening' },
-    emoji: '🌙',
-    slots: [
-      { value: '6:00 PM', label: '6:00' },
-      { value: '7:00 PM', label: '7:00' },
-      { value: '8:00 PM', label: '8:00' },
-      { value: '9:00 PM', label: '9:00' },
-      { value: '10:00 PM', label: '10:00' },
-      { value: '11:00 PM', label: '11:00' },
-    ],
-  },
-];
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  const dow = date.getDay(); // 0=Sun, 6=Sat
+
+  if (dow === 0) return []; // Sunday — closed
+
+  // Weekday: 11-21 (11AM-9PM), Saturday: 12-24 (12PM-12AM)
+  const startHour = dow === 6 ? 12 : 11;
+  const endHour = dow === 6 ? 24 : 21;
+
+  const morning: TimeSlot[] = [];
+  const afternoon: TimeSlot[] = [];
+  const evening: TimeSlot[] = [];
+
+  for (let h = startHour; h < endHour; h++) {
+    const h12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    const ampm = h >= 12 && h < 24 ? 'PM' : 'AM';
+    const slot: TimeSlot = { value: `${h12}:00 ${ampm}`, label: `${h12}:00` };
+
+    if (h < 12) morning.push(slot);
+    else if (h < 18) afternoon.push(slot);
+    else evening.push(slot);
+  }
+
+  const groups: TimeGroup[] = [];
+  if (morning.length) groups.push({ name: { es: 'Mañana', en: 'Morning' }, emoji: '☀️', slots: morning });
+  if (afternoon.length) groups.push({ name: { es: 'Tarde', en: 'Afternoon' }, emoji: '🌤️', slots: afternoon });
+  if (evening.length) groups.push({ name: { es: 'Noche', en: 'Evening' }, emoji: '🌙', slots: evening });
+
+  return groups;
+}
 
 /* ── Component ── */
 
@@ -97,6 +92,17 @@ export default function ReservationForm() {
 
   const today = new Date().toISOString().split('T')[0];
 
+  const timeGroups = useMemo(() => getTimeGroups(form.date), [form.date]);
+  const isSunday = form.date ? new Date(form.date.replace(/-/g, '/')).getDay() === 0 : false;
+
+  // When date changes, reset time if it's no longer valid
+  const handleDateChange = (dateStr: string) => {
+    const groups = getTimeGroups(dateStr);
+    const allSlots = groups.flatMap((g) => g.slots);
+    const timeStillValid = allSlots.some((s) => s.value === form.time);
+    setForm({ ...form, date: dateStr, time: timeStillValid ? form.time : '' });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setTried(true);
@@ -106,8 +112,7 @@ export default function ReservationForm() {
       { name: form.name, guests: form.guests, date: formattedDate, time: form.time, comments: form.comments },
       locale,
     );
-    const url = buildWhatsAppUrl(message);
-    window.open(url, '_blank');
+    window.open(buildWhatsAppUrl(message), '_blank');
   };
 
   const openDatePicker = () => {
@@ -134,47 +139,25 @@ export default function ReservationForm() {
         )}
       </div>
 
-      {/* Guests counter */}
+      {/* Guests */}
       <div className="w-full">
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          {t('guests')}
-        </label>
+        <label className="block text-sm font-medium text-gray-300 mb-2">{t('guests')}</label>
         <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={() => setForm({ ...form, guests: String(Math.max(1, guestsNum - 1)) })}
-            className="w-10 h-10 rounded-lg bg-dark border border-gray-700 flex items-center justify-center text-white hover:border-accent transition-colors"
-          >
+          <button type="button" onClick={() => setForm({ ...form, guests: String(Math.max(1, guestsNum - 1)) })} className="w-10 h-10 rounded-lg bg-dark border border-gray-700 flex items-center justify-center text-white hover:border-accent transition-colors">
             <HiMinus className="w-4 h-4" />
           </button>
           <span className="text-white font-bold text-xl w-8 text-center">{guestsNum}</span>
-          <button
-            type="button"
-            onClick={() => setForm({ ...form, guests: String(Math.min(20, guestsNum + 1)) })}
-            className="w-10 h-10 rounded-lg bg-dark border border-gray-700 flex items-center justify-center text-white hover:border-accent transition-colors"
-          >
+          <button type="button" onClick={() => setForm({ ...form, guests: String(Math.min(20, guestsNum + 1)) })} className="w-10 h-10 rounded-lg bg-dark border border-gray-700 flex items-center justify-center text-white hover:border-accent transition-colors">
             <HiPlus className="w-4 h-4" />
           </button>
-          <span className="text-gray-500 text-sm">
-            {guestsNum === 1 ? (isEs ? 'persona' : 'person') : (isEs ? 'personas' : 'people')}
-          </span>
+          <span className="text-gray-500 text-sm">{guestsNum === 1 ? (isEs ? 'persona' : 'person') : (isEs ? 'personas' : 'people')}</span>
         </div>
       </div>
 
       {/* Date */}
       <div className="w-full">
-        <label className="block text-sm font-medium text-gray-300 mb-2">
-          {t('date')}
-        </label>
-        <input
-          ref={dateInputRef}
-          type="date"
-          min={today}
-          value={form.date}
-          onChange={(e) => setForm({ ...form, date: e.target.value })}
-          className="sr-only"
-          tabIndex={-1}
-        />
+        <label className="block text-sm font-medium text-gray-300 mb-2">{t('date')}</label>
+        <input ref={dateInputRef} type="date" min={today} value={form.date} onChange={(e) => handleDateChange(e.target.value)} className="sr-only" tabIndex={-1} />
         <button
           type="button"
           onClick={openDatePicker}
@@ -187,63 +170,77 @@ export default function ReservationForm() {
           }`}
         >
           <HiOutlineCalendar className={`w-5 h-5 shrink-0 ${form.date ? 'text-accent' : showError(missingDate) ? 'text-red-400' : 'text-gray-500'}`} />
-          <span className="text-base">
-            {form.date
-              ? formatDateLabel(form.date, locale)
-              : (isEs ? 'Seleccionar fecha' : 'Select date')}
-          </span>
+          <span className="text-base">{form.date ? formatDateLabel(form.date, locale) : (isEs ? 'Seleccionar fecha' : 'Select date')}</span>
         </button>
         {showError(missingDate) && (
           <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Selecciona una fecha' : 'Select a date'}</p>
         )}
       </div>
 
-      {/* Time — grouped by period */}
+      {/* Time — depends on selected date */}
       <div className="w-full">
         <label className={`block text-sm font-medium mb-3 ${showError(missingTime) ? 'text-red-400' : 'text-gray-300'}`}>
           {t('time')}
         </label>
-        <div className="space-y-3">
-          {timeGroups.map((group) => (
-            <div key={group.name.en}>
-              <p className="text-white/30 text-[11px] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                <span>{group.emoji}</span>
-                {group.name[isEs ? 'es' : 'en']}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {group.slots.map((slot) => {
-                  const selected = form.time === slot.value;
-                  return (
-                    <button
-                      key={slot.value}
-                      type="button"
-                      onClick={() => setForm({ ...form, time: slot.value })}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
-                        selected
-                          ? 'border-accent bg-accent/15 text-white'
-                          : showError(missingTime)
-                            ? 'border-red-500/30 text-white/40 hover:border-gray-500 hover:text-white/60'
-                            : 'border-gray-700 text-white/40 hover:border-gray-500 hover:text-white/60'
-                      }`}
-                    >
-                      {slot.label}
-                    </button>
-                  );
-                })}
+
+        {!form.date ? (
+          /* No date selected — placeholder that opens date picker */
+          <button
+            type="button"
+            onClick={openDatePicker}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-700 bg-dark-light text-gray-500 hover:border-gray-500 transition-colors text-left text-sm"
+          >
+            <HiOutlineCalendar className="w-4 h-4 shrink-0" />
+            {isEs ? 'Selecciona una fecha primero' : 'Select a date first'}
+          </button>
+        ) : isSunday ? (
+          /* Sunday — closed */
+          <p className="text-white/30 text-sm px-4 py-3 rounded-lg border border-gray-800 bg-dark-light">
+            {isEs ? 'Cerrado los domingos' : 'Closed on Sundays'}
+          </p>
+        ) : (
+          /* Show time groups */
+          <div className="space-y-3">
+            {timeGroups.map((group) => (
+              <div key={group.name.en}>
+                <p className="text-white/30 text-[11px] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                  <span>{group.emoji}</span>
+                  {group.name[isEs ? 'es' : 'en']}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {group.slots.map((slot) => {
+                    const selected = form.time === slot.value;
+                    return (
+                      <button
+                        key={slot.value}
+                        type="button"
+                        onClick={() => setForm({ ...form, time: slot.value })}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                          selected
+                            ? 'border-accent bg-accent/15 text-white'
+                            : showError(missingTime)
+                              ? 'border-red-500/30 text-white/40 hover:border-gray-500 hover:text-white/60'
+                              : 'border-gray-700 text-white/40 hover:border-gray-500 hover:text-white/60'
+                        }`}
+                      >
+                        {slot.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-        {showError(missingTime) && (
+            ))}
+          </div>
+        )}
+
+        {showError(missingTime) && form.date && !isSunday && (
           <p className="text-red-400 text-xs mt-2">{isEs ? 'Selecciona una hora' : 'Select a time'}</p>
         )}
       </div>
 
       {/* Comments */}
       <div className="w-full">
-        <label htmlFor="res-comments" className="block text-sm font-medium text-gray-300 mb-1">
-          {t('comments')}
-        </label>
+        <label htmlFor="res-comments" className="block text-sm font-medium text-gray-300 mb-1">{t('comments')}</label>
         <textarea
           id="res-comments"
           rows={3}
@@ -259,18 +256,14 @@ export default function ReservationForm() {
         <button
           type="submit"
           className={`w-full font-semibold rounded-lg transition-all duration-300 inline-flex items-center justify-center gap-2 px-8 py-4 text-lg ${
-            isValid
-              ? 'bg-accent hover:bg-accent-light text-white'
-              : 'bg-accent/30 text-white/40 cursor-not-allowed'
+            isValid ? 'bg-accent hover:bg-accent-light text-white' : 'bg-accent/30 text-white/40 cursor-not-allowed'
           }`}
         >
           <FaWhatsapp className="w-5 h-5" />
           {t('submit')}
         </button>
         {tried && !isValid && (
-          <p className="text-white/30 text-xs text-center mt-2">
-            {isEs ? 'Completa los campos requeridos' : 'Fill in the required fields'}
-          </p>
+          <p className="text-white/30 text-xs text-center mt-2">{isEs ? 'Completa los campos requeridos' : 'Fill in the required fields'}</p>
         )}
       </div>
     </form>
