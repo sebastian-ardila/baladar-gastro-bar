@@ -53,18 +53,18 @@ export const categoryIcons: Record<string, IconType> = {
 };
 
 const tabs: Tab[] = [
-  { id: 'almuerzos', label: { es: 'Almuerzos', en: 'Lunch' }, icon: PiCookingPotFill },
+  { id: 'almuerzos', label: { es: 'Almuerzos Baladar', en: 'Baladar Lunch' }, icon: PiCookingPotFill },
   { id: 'comidas', label: { es: 'Comidas', en: 'Food' }, icon: PiHamburgerFill },
   { id: 'pizzas', label: { es: 'Pizzas', en: 'Pizzas' }, icon: PiPizzaFill },
-  { id: 'pizzas-especiales', label: { es: 'Especiales', en: 'Special' }, icon: PiStarFill },
+  { id: 'pizzas-especiales', label: { es: 'Pizzas Especiales', en: 'Special Pizzas' }, icon: PiStarFill },
   { id: 'postres', label: { es: 'Postres', en: 'Desserts' }, icon: PiIceCreamFill },
-  { id: 'calientes', label: { es: 'Calientes', en: 'Hot' }, icon: PiCoffeeFill },
+  { id: 'calientes', label: { es: 'Calientes', en: 'Hot Drinks' }, icon: PiCoffeeFill },
   { id: 'cockteles', label: { es: 'Cócteles', en: 'Cocktails' }, icon: PiMartiniFill },
-  { id: 'cervezas-barril', label: { es: 'De Barril', en: 'Draft' }, icon: PiBeerSteinFill },
+  { id: 'cervezas-barril', label: { es: 'Cervezas de Barril', en: 'Draft Beers' }, icon: PiBeerSteinFill },
   { id: 'cervezas', label: { es: 'Cervezas', en: 'Beers' }, icon: PiBeerBottleFill },
-  { id: 'cervezas-artesanales', label: { es: 'Artesanales', en: 'Craft' }, icon: PiMountainsFill },
-  { id: 'licores-vinos', label: { es: 'Licores', en: 'Spirits' }, icon: PiWineFill },
-  { id: 'bebidas-frias', label: { es: 'Frías', en: 'Cold' }, icon: PiSnowflakeFill },
+  { id: 'cervezas-artesanales', label: { es: 'Cervezas Artesanales', en: 'Craft Beers' }, icon: PiMountainsFill },
+  { id: 'licores-vinos', label: { es: 'Licores y Vinos', en: 'Spirits & Wine' }, icon: PiWineFill },
+  { id: 'bebidas-frias', label: { es: 'Bebidas Frías', en: 'Cold Drinks' }, icon: PiSnowflakeFill },
   { id: 'vegetariano', label: { es: 'Vegetariano', en: 'Vegetarian' }, icon: PiLeafFill },
 ];
 
