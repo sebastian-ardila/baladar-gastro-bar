@@ -9,20 +9,54 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 
+const selectClass =
+  'flex-1 bg-dark-light border border-gray-700 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-base appearance-none';
+
+function generateDateOptions(locale: string) {
+  const isEs = locale === 'es';
+  const now = new Date();
+
+  const days = Array.from({ length: 31 }, (_, i) => ({
+    value: String(i + 1),
+    label: String(i + 1),
+  }));
+
+  const monthNames = isEs
+    ? ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+    : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  const months = monthNames.map((name, i) => ({
+    value: String(i + 1),
+    label: name,
+  }));
+
+  const currentYear = now.getFullYear();
+  const years = [
+    { value: String(currentYear), label: String(currentYear) },
+    { value: String(currentYear + 1), label: String(currentYear + 1) },
+  ];
+
+  return { days, months, years };
+}
+
 export default function ReservationForm() {
   const t = useTranslations('reservation');
   const locale = useLocale();
   const [form, setForm] = useState({
     name: '',
     guests: '2',
-    date: '',
+    day: '',
+    month: '',
+    year: '',
     time: '',
     comments: '',
   });
 
   const guestsNum = parseInt(form.guests) || 1;
+  const { days, months, years } = generateDateOptions(locale);
 
-  const isValid = form.name.trim() && form.date && form.time;
+  const hasDate = form.day && form.month && form.year;
+  const isValid = form.name.trim() && hasDate && form.time;
 
   const timeOptions = [
     { value: '', label: t('time') },
@@ -37,10 +71,16 @@ export default function ReservationForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid) return;
-    const message = buildReservationMessage(form, locale);
+    const dateStr = `${form.day}/${form.month}/${form.year}`;
+    const message = buildReservationMessage(
+      { name: form.name, guests: form.guests, date: dateStr, time: form.time, comments: form.comments },
+      locale,
+    );
     const url = buildWhatsAppUrl(message);
     window.open(url, '_blank');
   };
+
+  const isEs = locale === 'es';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -74,18 +114,51 @@ export default function ReservationForm() {
           >
             <HiPlus className="w-4 h-4" />
           </button>
-          <span className="text-gray-500 text-sm">{guestsNum === 1 ? 'persona' : 'personas'}</span>
+          <span className="text-gray-500 text-sm">{guestsNum === 1 ? (isEs ? 'persona' : 'person') : (isEs ? 'personas' : 'people')}</span>
         </div>
       </div>
 
-      <Input
-        label={t('date')}
-        id="res-date"
-        type="date"
-        value={form.date}
-        onChange={(e) => setForm({ ...form, date: e.target.value })}
-        required
-      />
+      {/* Date — three selects instead of native date input */}
+      <div className="w-full">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          {t('date')}
+        </label>
+        <div className="flex gap-2">
+          <select
+            value={form.day}
+            onChange={(e) => setForm({ ...form, day: e.target.value })}
+            className={selectClass}
+            required
+          >
+            <option value="">{isEs ? 'Día' : 'Day'}</option>
+            {days.map((d) => (
+              <option key={d.value} value={d.value}>{d.label}</option>
+            ))}
+          </select>
+          <select
+            value={form.month}
+            onChange={(e) => setForm({ ...form, month: e.target.value })}
+            className={selectClass}
+            required
+          >
+            <option value="">{isEs ? 'Mes' : 'Month'}</option>
+            {months.map((m) => (
+              <option key={m.value} value={m.value}>{m.label}</option>
+            ))}
+          </select>
+          <select
+            value={form.year}
+            onChange={(e) => setForm({ ...form, year: e.target.value })}
+            className={selectClass}
+            required
+          >
+            <option value="">{isEs ? 'Año' : 'Year'}</option>
+            {years.map((y) => (
+              <option key={y.value} value={y.value}>{y.label}</option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       <Select
         label={t('time')}
