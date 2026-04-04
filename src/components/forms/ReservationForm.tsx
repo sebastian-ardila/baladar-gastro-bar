@@ -120,6 +120,7 @@ export default function ReservationForm() {
           label={t('name')}
           id="res-name"
           placeholder={t('namePlaceholder')}
+          autoComplete="name"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           className={showError(missingName) ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500/30' : ''}

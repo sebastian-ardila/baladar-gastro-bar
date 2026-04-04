@@ -56,6 +56,7 @@ export default function ContactForm() {
           label={t('name')}
           id="contact-name"
           placeholder={t('namePlaceholder')}
+          autoComplete="name"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           className={showError(missingName) ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500/30' : ''}
@@ -70,6 +71,7 @@ export default function ContactForm() {
           label={t('email')}
           id="contact-email"
           type="email"
+          autoComplete="email"
           placeholder={t('emailPlaceholder')}
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -84,6 +86,7 @@ export default function ContactForm() {
         label={t('phone')}
         id="contact-phone"
         type="tel"
+        autoComplete="tel"
         placeholder={t('phonePlaceholder')}
         value={form.phone}
         onChange={(e) => setForm({ ...form, phone: e.target.value })}

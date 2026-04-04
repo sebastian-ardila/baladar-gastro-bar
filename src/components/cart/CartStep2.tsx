@@ -48,6 +48,7 @@ export default function CartStep2() {
           <input
             type="text"
             placeholder={t('namePlaceholder')}
+            autoComplete="name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white placeholder-white/25 focus:outline-none focus:ring-2 transition-all text-base ${
