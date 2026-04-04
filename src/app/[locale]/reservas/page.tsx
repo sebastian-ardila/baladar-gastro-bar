@@ -82,8 +82,8 @@ export default async function ReservasPage({
           </div>
 
           {/* Right column — form */}
-          <div className="lg:col-span-2 lg:order-2 order-1">
-            <div className="bg-dark-card rounded-2xl p-6 sm:p-8 border border-gray-800/60">
+          <div className="lg:col-span-2 lg:order-2 order-1 min-w-0">
+            <div className="bg-dark-card rounded-2xl p-4 sm:p-8 border border-gray-800/60 overflow-hidden">
               <h2 className="text-white font-semibold text-lg mb-1">
                 {locale === 'es' ? 'Datos de la reserva' : 'Reservation details'}
               </h2>

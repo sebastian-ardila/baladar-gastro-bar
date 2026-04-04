@@ -18,9 +18,9 @@ export default function Select({ label, options, className, id, ...props }: Sele
       <select
         id={id}
         className={cn(
-          'w-full bg-dark-light border border-gray-700 rounded-lg px-4 py-3 text-white',
+          'w-full min-w-0 max-w-full bg-dark-light border border-gray-700 rounded-lg px-3 sm:px-4 py-3 text-white',
           'focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent',
-          'transition-colors text-base appearance-none',
+          'transition-colors text-base appearance-none box-border',
           className
         )}
         {...props}

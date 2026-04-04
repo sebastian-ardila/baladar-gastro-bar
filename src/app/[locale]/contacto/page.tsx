@@ -74,7 +74,7 @@ export default async function ContactoPage({
           </div>
 
           {/* Form */}
-          <div className="lg:col-span-2 bg-dark-card rounded-2xl p-6 sm:p-8 border border-gray-800">
+          <div className="lg:col-span-2 min-w-0 bg-dark-card rounded-2xl p-4 sm:p-8 border border-gray-800 overflow-hidden">
             <ContactForm />
           </div>
         </div>
