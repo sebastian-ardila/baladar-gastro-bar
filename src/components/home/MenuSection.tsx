@@ -24,7 +24,6 @@ function buildSections() {
     .filter((g) => g.items.length > 0);
 }
 
-/** All category IDs in section order, used by the IntersectionObserver */
 const allCatIds = buildSections().map((s) => s.id);
 
 /* ── Component ── */
@@ -37,17 +36,19 @@ export default function MenuSection() {
   const [forced, setForced] = useState<Set<string>>(new Set());
 
   const stickyBarEl = useRef<HTMLDivElement>(null);
-  const isScrollingRef = useRef(false); // ref, not state — no re-renders, synchronous
+  const isScrollingRef = useRef(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const observedIds = useRef<Set<string>>(new Set());
 
   const sections = buildSections();
 
-  /* ── 1. Scroll spy via IntersectionObserver ── */
+  /* ── 1. Create IntersectionObserver once ── */
   useEffect(() => {
     const offset = NAVBAR_HEIGHT + 160;
 
-    const observer = new IntersectionObserver(
+    observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (isScrollingRef.current) return; // locked during programmatic scroll
+        if (isScrollingRef.current) return;
         for (const entry of entries) {
           if (entry.isIntersecting) {
             setActiveCategory(entry.target.id.replace('cat-', '') as Category);
@@ -57,22 +58,48 @@ export default function MenuSection() {
       { rootMargin: `-${offset}px 0px -60% 0px`, threshold: 0 },
     );
 
-    allCatIds.forEach((id) => {
-      const el = document.getElementById(`cat-${id}`);
-      if (el) observer.observe(el);
-    });
+    return () => observerRef.current?.disconnect();
+  }, []);
 
-    return () => observer.disconnect();
-  }, []); // no dependencies — observer lives for component lifetime
+  /* ── 2. Scan for new section elements and observe them ── */
+  useEffect(() => {
+    const scan = () => {
+      const observer = observerRef.current;
+      if (!observer) return;
 
-  /* ── 2. Clear active when menu is not in sticky zone ── */
+      allCatIds.forEach((id) => {
+        if (observedIds.current.has(id)) return;
+        const el = document.getElementById(`cat-${id}`);
+        if (el) {
+          observer.observe(el);
+          observedIds.current.add(id);
+        }
+      });
+    };
+
+    // Scan immediately + on every scroll (lazy sections mount as user scrolls)
+    scan();
+    window.addEventListener('scroll', scan, { passive: true });
+    // Also scan periodically for the first few seconds (covers page restore)
+    const t1 = setTimeout(scan, 100);
+    const t2 = setTimeout(scan, 500);
+    const t3 = setTimeout(scan, 1000);
+
+    return () => {
+      window.removeEventListener('scroll', scan);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, []);
+
+  /* ── 3. Clear active when menu is not in sticky zone ── */
   useEffect(() => {
     const onScroll = () => {
       if (isScrollingRef.current) return;
       const bar = stickyBarEl.current;
       if (!bar) return;
 
-      // Check if the sticky bar is actually stuck (its top equals navbar height)
       const barRect = bar.getBoundingClientRect();
       const isStuck = barRect.top <= NAVBAR_HEIGHT + 1;
 
@@ -85,25 +112,25 @@ export default function MenuSection() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* ── 3. Click category → force-render + scroll ── */
+  /* ── 4. Click category → force-render + scroll ── */
   const handleSelect = useCallback((category: Category) => {
-    // Force render the lazy section
     setForced((prev) => new Set(prev).add(category));
-
-    // Lock scroll spy
     isScrollingRef.current = true;
     setActiveCategory(category);
 
-    // Double rAF: let React render forced section, then measure layout
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const el = document.getElementById(`cat-${category}`);
         if (el) {
+          // Observe it if not already
+          if (!observedIds.current.has(category) && observerRef.current) {
+            observerRef.current.observe(el);
+            observedIds.current.add(category);
+          }
           const fixedH = stickyBarEl.current?.offsetHeight ?? 80;
           const y = el.getBoundingClientRect().top + window.scrollY - NAVBAR_HEIGHT - fixedH - 16;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
-        // Release lock after smooth scroll completes (~1s)
         setTimeout(() => {
           isScrollingRef.current = false;
         }, 1000);
@@ -119,7 +146,6 @@ export default function MenuSection() {
           {t('title')}
         </h2>
 
-        {/* Sticky category bar */}
         <div
           ref={stickyBarEl}
           className="sticky top-14 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-dark/95 backdrop-blur-md border-b border-gray-800/40"
@@ -127,7 +153,6 @@ export default function MenuSection() {
           <CategoryTabs activeCategory={activeCategory} onSelect={handleSelect} />
         </div>
 
-        {/* Category sections */}
         <div className="mt-10 space-y-12">
           {sections.map((section) => {
             const Icon = categoryIcons[section.id];
