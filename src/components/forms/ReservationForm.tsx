@@ -39,14 +39,19 @@ export default function ReservationForm() {
     time: '',
     comments: '',
   });
+  const [tried, setTried] = useState(false);
 
   const guestsNum = parseInt(form.guests) || 1;
-  const isValid = form.name.trim() && form.date && form.time;
+
+  const missingName = !form.name.trim();
+  const missingDate = !form.date;
+  const missingTime = !form.time;
+  const isValid = !missingName && !missingDate && !missingTime;
 
   const today = new Date().toISOString().split('T')[0];
 
   const timeOptions = [
-    { value: '', label: t('time') },
+    { value: '', label: isEs ? 'Seleccionar hora' : 'Select time' },
     ...Array.from({ length: 13 }, (_, i) => {
       const hour = 11 + i;
       const h = hour > 12 ? hour - 12 : hour;
@@ -57,6 +62,7 @@ export default function ReservationForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setTried(true);
     if (!isValid) return;
     const formattedDate = formatDateLabel(form.date, locale);
     const message = buildReservationMessage(
@@ -72,16 +78,25 @@ export default function ReservationForm() {
     dateInputRef.current?.focus();
   };
 
+  // Show error styling only after user tried to submit
+  const showError = (missing: boolean) => tried && missing;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <Input
-        label={t('name')}
-        id="res-name"
-        placeholder={t('namePlaceholder')}
-        value={form.name}
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-        required
-      />
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+      {/* Name */}
+      <div>
+        <Input
+          label={t('name')}
+          id="res-name"
+          placeholder={t('namePlaceholder')}
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          className={showError(missingName) ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500/30' : ''}
+        />
+        {showError(missingName) && (
+          <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Ingresa tu nombre' : 'Enter your name'}</p>
+        )}
+      </div>
 
       {/* Guests counter */}
       <div className="w-full">
@@ -123,7 +138,6 @@ export default function ReservationForm() {
           onChange={(e) => setForm({ ...form, date: e.target.value })}
           className="sr-only"
           tabIndex={-1}
-          required
         />
         <button
           type="button"
@@ -131,27 +145,37 @@ export default function ReservationForm() {
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-colors text-left ${
             form.date
               ? 'border-accent/40 bg-accent/5 text-white'
-              : 'border-gray-700 bg-dark-light text-gray-500 hover:border-gray-500'
+              : showError(missingDate)
+                ? 'border-red-500/60 bg-dark-light text-gray-500'
+                : 'border-gray-700 bg-dark-light text-gray-500 hover:border-gray-500'
           }`}
         >
-          <HiOutlineCalendar className={`w-5 h-5 shrink-0 ${form.date ? 'text-accent' : 'text-gray-500'}`} />
+          <HiOutlineCalendar className={`w-5 h-5 shrink-0 ${form.date ? 'text-accent' : showError(missingDate) ? 'text-red-400' : 'text-gray-500'}`} />
           <span className="text-base">
             {form.date
               ? formatDateLabel(form.date, locale)
               : (isEs ? 'Seleccionar fecha' : 'Select date')}
           </span>
         </button>
+        {showError(missingDate) && (
+          <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Selecciona una fecha' : 'Select a date'}</p>
+        )}
       </div>
 
       {/* Time */}
-      <Select
-        label={t('time')}
-        id="res-time"
-        options={timeOptions}
-        value={form.time}
-        onChange={(e) => setForm({ ...form, time: e.target.value })}
-        required
-      />
+      <div>
+        <Select
+          label={t('time')}
+          id="res-time"
+          options={timeOptions}
+          value={form.time}
+          onChange={(e) => setForm({ ...form, time: e.target.value })}
+          className={showError(missingTime) ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500/30' : ''}
+        />
+        {showError(missingTime) && (
+          <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Selecciona una hora' : 'Select a time'}</p>
+        )}
+      </div>
 
       {/* Comments */}
       <div className="w-full">
@@ -168,10 +192,18 @@ export default function ReservationForm() {
         />
       </div>
 
-      <Button type="submit" className="w-full" size="lg" disabled={!isValid}>
-        <FaWhatsapp className="w-5 h-5" />
-        {t('submit')}
-      </Button>
+      {/* Submit */}
+      <div>
+        <Button type="submit" className="w-full" size="lg" disabled={!isValid}>
+          <FaWhatsapp className="w-5 h-5" />
+          {t('submit')}
+        </Button>
+        {tried && !isValid && (
+          <p className="text-white/30 text-xs text-center mt-2">
+            {isEs ? 'Completa los campos requeridos' : 'Fill in the required fields'}
+          </p>
+        )}
+      </div>
     </form>
   );
 }
