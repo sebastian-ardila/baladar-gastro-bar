@@ -24,6 +24,9 @@ function buildSections() {
     .filter((g) => g.items.length > 0);
 }
 
+/** All category IDs in section order, used by the IntersectionObserver */
+const allCatIds = buildSections().map((s) => s.id);
+
 /* ── Component ── */
 
 export default function MenuSection() {
@@ -31,90 +34,86 @@ export default function MenuSection() {
   const locale = useTypedLocale();
 
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
-  const [scrollingTo, setScrollingTo] = useState(false);
   const [forced, setForced] = useState<Set<string>>(new Set());
 
-  const sectionEls = useRef<Map<string, HTMLDivElement>>(new Map());
-  const menuEl = useRef<HTMLDivElement>(null);
   const stickyBarEl = useRef<HTMLDivElement>(null);
-  const rafId = useRef<number>(0);
+  const isScrollingRef = useRef(false); // ref, not state — no re-renders, synchronous
 
   const sections = buildSections();
 
-  const getOffset = useCallback(() => {
-    const barHeight = stickyBarEl.current?.offsetHeight ?? 80;
-    return NAVBAR_HEIGHT + barHeight;
-  }, []);
-
-  /* ── Scroll spy: detect which section is at the top ── */
+  /* ── 1. Scroll spy via IntersectionObserver ── */
   useEffect(() => {
-    const onScroll = () => {
-      cancelAnimationFrame(rafId.current);
-      rafId.current = requestAnimationFrame(() => {
-        if (scrollingTo) return;
+    const offset = NAVBAR_HEIGHT + 160;
 
-        const menu = menuEl.current;
-        if (!menu) return;
-
-        const offset = getOffset();
-        const menuRect = menu.getBoundingClientRect();
-
-        if (menuRect.bottom < offset || menuRect.top > window.innerHeight) {
-          setActiveCategory(null);
-          return;
-        }
-
-        let best: Category | null = null;
-        let bestTop = -Infinity;
-
-        for (const [id, el] of sectionEls.current) {
-          const top = el.getBoundingClientRect().top;
-          if (top <= offset + 60 && top > bestTop) {
-            bestTop = top;
-            best = id as Category;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isScrollingRef.current) return; // locked during programmatic scroll
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveCategory(entry.target.id.replace('cat-', '') as Category);
           }
         }
+      },
+      { rootMargin: `-${offset}px 0px -60% 0px`, threshold: 0 },
+    );
 
-        if (!best) {
-          setActiveCategory(null);
-          return;
-        }
+    allCatIds.forEach((id) => {
+      const el = document.getElementById(`cat-${id}`);
+      if (el) observer.observe(el);
+    });
 
-        setActiveCategory(best);
-      });
+    return () => observer.disconnect();
+  }, []); // no dependencies — observer lives for component lifetime
+
+  /* ── 2. Clear active when menu is not in sticky zone ── */
+  useEffect(() => {
+    const onScroll = () => {
+      if (isScrollingRef.current) return;
+      const bar = stickyBarEl.current;
+      if (!bar) return;
+
+      // Check if the sticky bar is actually stuck (its top equals navbar height)
+      const barRect = bar.getBoundingClientRect();
+      const isStuck = barRect.top <= NAVBAR_HEIGHT + 1;
+
+      if (!isStuck) {
+        setActiveCategory(null);
+      }
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(rafId.current);
-    };
-  }, [scrollingTo, getOffset]);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-  /* ── Click category → force-render + scroll ── */
+  /* ── 3. Click category → force-render + scroll ── */
   const handleSelect = useCallback((category: Category) => {
+    // Force render the lazy section
     setForced((prev) => new Set(prev).add(category));
-    setActiveCategory(category);
-    setScrollingTo(true);
 
-    // Double rAF: first lets React render the forced section, second measures layout
+    // Lock scroll spy
+    isScrollingRef.current = true;
+    setActiveCategory(category);
+
+    // Double rAF: let React render forced section, then measure layout
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const target = document.getElementById(`cat-${category}`);
-        if (target) {
-          const navbarH = NAVBAR_HEIGHT;
+        const el = document.getElementById(`cat-${category}`);
+        if (el) {
           const fixedH = stickyBarEl.current?.offsetHeight ?? 80;
-          const y = target.getBoundingClientRect().top + window.scrollY - navbarH - fixedH - 16;
+          const y = el.getBoundingClientRect().top + window.scrollY - NAVBAR_HEIGHT - fixedH - 16;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
-        setTimeout(() => setScrollingTo(false), 1000);
+        // Release lock after smooth scroll completes (~1s)
+        setTimeout(() => {
+          isScrollingRef.current = false;
+        }, 1000);
       });
     });
   }, []);
 
   /* ── Render ── */
   return (
-    <section id="menu" ref={menuEl} className="pt-10 pb-16 sm:pt-14 sm:pb-20">
+    <section id="menu" className="pt-10 pb-16 sm:pt-14 sm:pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl sm:text-4xl font-bold text-white text-center mb-10">
           {t('title')}
@@ -141,10 +140,6 @@ export default function MenuSection() {
                 <div
                   id={`cat-${section.id}`}
                   data-category={section.id}
-                  ref={(el) => {
-                    if (el) sectionEls.current.set(section.id, el);
-                    else sectionEls.current.delete(section.id);
-                  }}
                 >
                   <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                     {Icon && <Icon className="w-6 h-6 text-white/40" />}
