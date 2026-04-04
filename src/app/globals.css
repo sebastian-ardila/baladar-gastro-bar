@@ -6,7 +6,8 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth removed — causes Chrome mobile navbar auto-hide issues.
+       All programmatic scrolls use behavior:'smooth' in JS instead. */
   }
   body {
     @apply bg-dark text-white antialiased;
