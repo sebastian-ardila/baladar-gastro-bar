@@ -12,6 +12,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 export default function CartStep2() {
   const t = useTranslations('cart');
   const locale = useTypedLocale();
+  const isEs = locale === 'es';
   const { items, subtotal, setStep } = useCart();
 
   const [form, setForm] = useState<OrderForm>({
@@ -19,10 +20,17 @@ export default function CartStep2() {
     paymentMethod: '',
     orderType: '',
   });
+  const [tried, setTried] = useState(false);
 
-  const isValid = form.name.trim() && form.paymentMethod && form.orderType;
+  const missingName = !form.name.trim();
+  const missingPayment = !form.paymentMethod;
+  const missingType = !form.orderType;
+  const isValid = !missingName && !missingPayment && !missingType;
+
+  const showError = (missing: boolean) => tried && missing;
 
   const handleSend = () => {
+    setTried(true);
     if (!isValid) return;
     const message = buildOrderMessage(items, form, locale);
     const url = buildWhatsAppUrl(message);
@@ -42,13 +50,20 @@ export default function CartStep2() {
             placeholder={t('namePlaceholder')}
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full bg-white/5 border-0 rounded-xl px-4 py-3 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-accent/50 text-base transition-all"
+            className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-white placeholder-white/25 focus:outline-none focus:ring-2 transition-all text-base ${
+              showError(missingName)
+                ? 'border-red-500/60 focus:ring-red-500/30'
+                : 'border-transparent focus:ring-accent/50'
+            }`}
           />
+          {showError(missingName) && (
+            <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Ingresa tu nombre' : 'Enter your name'}</p>
+          )}
         </div>
 
         {/* Payment Method */}
         <div>
-          <label className="block text-white/50 text-xs uppercase tracking-wider mb-2">
+          <label className={`block text-xs uppercase tracking-wider mb-2 ${showError(missingPayment) ? 'text-red-400' : 'text-white/50'}`}>
             {t('paymentMethod')}
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -58,10 +73,12 @@ export default function CartStep2() {
                 <button
                   key={method}
                   onClick={() => setForm({ ...form, paymentMethod: method })}
-                  className={`py-3 rounded-xl text-xs font-medium transition-all ${
+                  className={`py-3 rounded-xl text-xs font-medium transition-all border ${
                     selected
-                      ? 'bg-accent text-white'
-                      : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60'
+                      ? 'bg-accent text-white border-accent'
+                      : showError(missingPayment)
+                        ? 'bg-white/5 text-white/40 border-red-500/40'
+                        : 'bg-white/5 text-white/40 border-transparent hover:bg-white/10 hover:text-white/60'
                   }`}
                 >
                   {t(method === 'transferencia' ? 'transfer' : method === 'tarjeta' ? 'card' : 'cash')}
@@ -69,11 +86,14 @@ export default function CartStep2() {
               );
             })}
           </div>
+          {showError(missingPayment) && (
+            <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Selecciona método de pago' : 'Select payment method'}</p>
+          )}
         </div>
 
         {/* Order Type */}
         <div>
-          <label className="block text-white/50 text-xs uppercase tracking-wider mb-2">
+          <label className={`block text-xs uppercase tracking-wider mb-2 ${showError(missingType) ? 'text-red-400' : 'text-white/50'}`}>
             {t('orderType')}
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -83,10 +103,12 @@ export default function CartStep2() {
                 <button
                   key={type}
                   onClick={() => setForm({ ...form, orderType: type })}
-                  className={`py-3.5 rounded-xl text-sm font-medium transition-all ${
+                  className={`py-3.5 rounded-xl text-sm font-medium transition-all border ${
                     selected
-                      ? 'bg-accent text-white'
-                      : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60'
+                      ? 'bg-accent text-white border-accent'
+                      : showError(missingType)
+                        ? 'bg-white/5 text-white/40 border-red-500/40'
+                        : 'bg-white/5 text-white/40 border-transparent hover:bg-white/10 hover:text-white/60'
                   }`}
                 >
                   {type === 'mesa' ? '🍽️ ' : '🛵 '}
@@ -95,6 +117,9 @@ export default function CartStep2() {
               );
             })}
           </div>
+          {showError(missingType) && (
+            <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Selecciona tipo de pedido' : 'Select order type'}</p>
+          )}
         </div>
 
         {/* Order Summary */}
@@ -137,6 +162,11 @@ export default function CartStep2() {
           <FaWhatsapp className="w-4 h-4" />
           {t('sendWhatsApp')}
         </button>
+        {tried && !isValid && (
+          <p className="text-white/30 text-xs text-center mt-2">
+            {isEs ? 'Completa los campos requeridos' : 'Fill in the required fields'}
+          </p>
+        )}
         <button
           onClick={() => setStep(1)}
           className="w-full py-2 mt-2 text-white/30 hover:text-white/60 text-xs transition-colors"

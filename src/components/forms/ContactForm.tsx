@@ -11,6 +11,8 @@ import Select from '@/components/ui/Select';
 export default function ContactForm() {
   const t = useTranslations('contact');
   const locale = useLocale();
+  const isEs = locale === 'es';
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -18,11 +20,18 @@ export default function ContactForm() {
     interest: '',
     message: '',
   });
+  const [tried, setTried] = useState(false);
 
-  const isValid = form.name.trim() && form.email.trim() && form.interest && form.message.trim();
+  const missingName = !form.name.trim();
+  const missingEmail = !form.email.trim();
+  const missingInterest = !form.interest;
+  const missingMessage = !form.message.trim();
+  const isValid = !missingName && !missingEmail && !missingInterest && !missingMessage;
+
+  const showError = (missing: boolean) => tried && missing;
 
   const interestOptions = [
-    { value: '', label: t('interest') },
+    { value: '', label: isEs ? 'Seleccionar motivo' : 'Select reason' },
     { value: t('interests.franchise'), label: t('interests.franchise') },
     { value: t('interests.supplier'), label: t('interests.supplier') },
     { value: t('interests.collaboration'), label: t('interests.collaboration') },
@@ -33,6 +42,7 @@ export default function ContactForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setTried(true);
     if (!isValid) return;
     const message = buildContactMessage(form, locale);
     const url = buildWhatsAppUrl(message);
@@ -40,25 +50,35 @@ export default function ContactForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <Input
-        label={t('name')}
-        id="contact-name"
-        placeholder={t('namePlaceholder')}
-        value={form.name}
-        onChange={(e) => setForm({ ...form, name: e.target.value })}
-        required
-      />
+    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      <div>
+        <Input
+          label={t('name')}
+          id="contact-name"
+          placeholder={t('namePlaceholder')}
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+          className={showError(missingName) ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500/30' : ''}
+        />
+        {showError(missingName) && (
+          <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Ingresa tu nombre' : 'Enter your name'}</p>
+        )}
+      </div>
 
-      <Input
-        label={t('email')}
-        id="contact-email"
-        type="email"
-        placeholder={t('emailPlaceholder')}
-        value={form.email}
-        onChange={(e) => setForm({ ...form, email: e.target.value })}
-        required
-      />
+      <div>
+        <Input
+          label={t('email')}
+          id="contact-email"
+          type="email"
+          placeholder={t('emailPlaceholder')}
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          className={showError(missingEmail) ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500/30' : ''}
+        />
+        {showError(missingEmail) && (
+          <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Ingresa tu email' : 'Enter your email'}</p>
+        )}
+      </div>
 
       <Input
         label={t('phone')}
@@ -69,14 +89,19 @@ export default function ContactForm() {
         onChange={(e) => setForm({ ...form, phone: e.target.value })}
       />
 
-      <Select
-        label={t('interest')}
-        id="contact-interest"
-        options={interestOptions}
-        value={form.interest}
-        onChange={(e) => setForm({ ...form, interest: e.target.value })}
-        required
-      />
+      <div>
+        <Select
+          label={t('interest')}
+          id="contact-interest"
+          options={interestOptions}
+          value={form.interest}
+          onChange={(e) => setForm({ ...form, interest: e.target.value })}
+          className={showError(missingInterest) ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500/30' : ''}
+        />
+        {showError(missingInterest) && (
+          <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Selecciona un motivo' : 'Select a reason'}</p>
+        )}
+      </div>
 
       <div className="w-full">
         <label htmlFor="contact-message" className="block text-sm font-medium text-gray-300 mb-1">
@@ -88,15 +113,28 @@ export default function ContactForm() {
           placeholder={t('messagePlaceholder')}
           value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}
-          className="w-full bg-dark-light border border-gray-700 rounded-lg px-3 sm:px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors text-base resize-none"
-          required
+          className={`w-full bg-dark-light border rounded-lg px-3 sm:px-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors text-base resize-none ${
+            showError(missingMessage)
+              ? 'border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500/30'
+              : 'border-gray-700 focus:border-accent focus:ring-1 focus:ring-accent'
+          }`}
         />
+        {showError(missingMessage) && (
+          <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Escribe tu mensaje' : 'Write your message'}</p>
+        )}
       </div>
 
-      <Button type="submit" className="w-full" size="lg" disabled={!isValid}>
-        <FaWhatsapp className="w-5 h-5" />
-        {t('submit')}
-      </Button>
+      <div>
+        <Button type="submit" className="w-full" size="lg" disabled={!isValid}>
+          <FaWhatsapp className="w-5 h-5" />
+          {t('submit')}
+        </Button>
+        {tried && !isValid && (
+          <p className="text-white/30 text-xs text-center mt-2">
+            {isEs ? 'Completa los campos requeridos' : 'Fill in the required fields'}
+          </p>
+        )}
+      </div>
     </form>
   );
 }
