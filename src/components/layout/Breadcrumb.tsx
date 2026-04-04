@@ -40,7 +40,7 @@ export default function Breadcrumb() {
   if (!labelKey) return null;
 
   return (
-    <div className="fixed top-14 left-0 right-0 z-40 bg-dark/90 backdrop-blur-sm">
+    <div className="bg-dark border-b border-gray-800/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 py-1.5 text-xs">
           <a

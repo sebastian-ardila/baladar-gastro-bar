@@ -35,8 +35,10 @@ export default async function LocaleLayout({
       <body className="bg-dark text-white font-sans min-h-screen flex flex-col">
         <NextIntlClientProvider messages={messages}>
           <CartProvider>
-            <Navbar />
-            <Breadcrumb />
+            <div className="sticky top-0 z-50">
+              <Navbar />
+              <Breadcrumb />
+            </div>
             <main className="flex-1">{children}</main>
             <Footer />
             <FloatingCartBadge />
