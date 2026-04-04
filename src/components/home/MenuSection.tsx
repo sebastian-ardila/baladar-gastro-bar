@@ -37,62 +37,66 @@ export default function MenuSection() {
 
   const sections = buildSections();
 
-  /* ── 1. Scroll spy via IntersectionObserver ── */
+  /* ── Scroll spy: detect which category is visible ── */
   useEffect(() => {
     const scrollRoot = getScrollRoot();
-    const barH = stickyBarRef.current?.offsetHeight ?? 80;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (isScrollingRef.current) return;
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveCategory(entry.target.id.replace('cat-', '') as Category);
-          }
-        }
-      },
-      {
-        root: scrollRoot,
-        rootMargin: `-${barH + 100}px 0px -60% 0px`,
-        threshold: 0,
-      },
-    );
-
-    allCatIds.forEach((id) => {
-      const el = document.getElementById(`cat-${id}`);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  /* ── 2. Clear active when category bar is not stuck ── */
-  useEffect(() => {
-    const scrollRoot = getScrollRoot();
+    const rafId = { current: 0 };
 
     const onScroll = () => {
-      if (isScrollingRef.current) return;
-      const bar = stickyBarRef.current;
-      if (!bar) return;
-      // The bar is sticky top-0 inside scroll-root.
-      // When stuck, its offsetTop equals scrollRoot.scrollTop (approximately).
-      // Simpler: check if the scroll container has scrolled past the menu title.
-      const menuEl = document.getElementById('menu');
-      if (!menuEl) return;
-      const menuTop = menuEl.getBoundingClientRect().top;
-      const scrollRootTop = scrollRoot.getBoundingClientRect().top;
-      // Menu section not yet reached the top of scroll container
-      if (menuTop - scrollRootTop > bar.offsetHeight + 50) {
-        setActiveCategory(null);
-      }
+      cancelAnimationFrame(rafId.current);
+      rafId.current = requestAnimationFrame(() => {
+        if (isScrollingRef.current) return;
+
+        const barH = stickyBarRef.current?.offsetHeight ?? 80;
+        // The scroll container's top edge in the viewport
+        const rootTop = scrollRoot.getBoundingClientRect().top;
+        // Detection line: just below the sticky category bar
+        const detectionLine = rootTop + barH + 60;
+
+        // Check if menu section is in view
+        const menuEl = document.getElementById('menu');
+        if (menuEl) {
+          const menuBottom = menuEl.getBoundingClientRect().bottom;
+          const menuTop = menuEl.getBoundingClientRect().top;
+          // Menu entirely above or below the scroll container view
+          if (menuBottom < rootTop || menuTop > rootTop + scrollRoot.clientHeight) {
+            setActiveCategory(null);
+            return;
+          }
+        }
+
+        // Find the section whose top is closest to (but above) the detection line
+        let best: Category | null = null;
+        let bestTop = -Infinity;
+
+        for (const id of allCatIds) {
+          const el = document.getElementById(`cat-${id}`);
+          if (!el) continue;
+          const top = el.getBoundingClientRect().top;
+          if (top <= detectionLine && top > bestTop) {
+            bestTop = top;
+            best = id as Category;
+          }
+        }
+
+        if (!best) {
+          setActiveCategory(null);
+          return;
+        }
+
+        setActiveCategory(best);
+      });
     };
 
     scrollRoot.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-    return () => scrollRoot.removeEventListener('scroll', onScroll);
+    onScroll(); // check on mount
+    return () => {
+      scrollRoot.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(rafId.current);
+    };
   }, []);
 
-  /* ── 3. Click category → scroll to section ── */
+  /* ── Click category → scroll to section ── */
   const scrollToCategory = useCallback((category: Category) => {
     isScrollingRef.current = true;
     setActiveCategory(category);
@@ -100,11 +104,9 @@ export default function MenuSection() {
     const el = document.getElementById(`cat-${category}`);
     if (el) {
       const scrollRoot = getScrollRoot();
+      const rootTop = scrollRoot.getBoundingClientRect().top;
       const fixedH = stickyBarRef.current?.offsetHeight ?? 80;
-      // getBoundingClientRect is relative to viewport; we need relative to scroll container
-      const scrollRootRect = scrollRoot.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
-      const y = elRect.top - scrollRootRect.top + scrollRoot.scrollTop - fixedH - 16;
+      const y = el.getBoundingClientRect().top - rootTop + scrollRoot.scrollTop - fixedH - 16;
       scrollRoot.scrollTo({ top: y, behavior: 'smooth' });
     }
 
