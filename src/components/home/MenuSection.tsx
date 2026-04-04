@@ -104,7 +104,7 @@ export default function MenuSection() {
         {/* Sticky category bar */}
         <div
           ref={stickyBarRef}
-          className="sticky top-14 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-dark/95 backdrop-blur-md border-b border-gray-800/40"
+          className="sticky top-14 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-dark border-b border-gray-800/40"
         >
           <CategoryTabs activeCategory={activeCategory} onSelect={scrollToCategory} />
         </div>
