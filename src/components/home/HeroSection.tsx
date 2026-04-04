@@ -16,7 +16,8 @@ export default function HeroSection() {
     const el = document.getElementById('menu');
     if (el) {
       const scrollRoot = getScrollRoot();
-      const top = el.getBoundingClientRect().top + scrollRoot.scrollTop - SCROLL_OFFSET;
+      const scrollRootRect = scrollRoot.getBoundingClientRect();
+      const top = el.getBoundingClientRect().top - scrollRootRect.top + scrollRoot.scrollTop;
       scrollRoot.scrollTo({ top, behavior: 'smooth' });
     }
   };

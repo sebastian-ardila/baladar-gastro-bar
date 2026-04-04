@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useTypedLocale } from '@/hooks/useTypedLocale';
 import { categories, menuItems, vegetarianItemIds } from '@/data/menu';
 import { Category } from '@/types/menu';
-import { NAVBAR_HEIGHT, getScrollRoot } from '@/lib/constants';
+import { getScrollRoot } from '@/lib/constants';
 import CategoryTabs, { categoryIcons } from '@/components/menu/CategoryTabs';
 import ProductCard from '@/components/menu/ProductCard';
 
@@ -37,9 +37,10 @@ export default function MenuSection() {
 
   const sections = buildSections();
 
-  /* ── 1. IntersectionObserver — detect active category ── */
+  /* ── 1. Scroll spy via IntersectionObserver ── */
   useEffect(() => {
-    const offset = 160; // navbar is outside scroll container, no need to account for it
+    const scrollRoot = getScrollRoot();
+    const barH = stickyBarRef.current?.offsetHeight ?? 80;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -50,7 +51,11 @@ export default function MenuSection() {
           }
         }
       },
-      { rootMargin: `-${offset}px 0px -60% 0px`, threshold: 0, root: getScrollRoot() },
+      {
+        root: scrollRoot,
+        rootMargin: `-${barH + 100}px 0px -60% 0px`,
+        threshold: 0,
+      },
     );
 
     allCatIds.forEach((id) => {
@@ -61,15 +66,25 @@ export default function MenuSection() {
     return () => observer.disconnect();
   }, []);
 
-  /* ── 2. Clear active when not in the menu zone ── */
+  /* ── 2. Clear active when category bar is not stuck ── */
   useEffect(() => {
     const scrollRoot = getScrollRoot();
+
     const onScroll = () => {
       if (isScrollingRef.current) return;
       const bar = stickyBarRef.current;
       if (!bar) return;
-      const isStuck = bar.getBoundingClientRect().top <= 1;
-      if (!isStuck) setActiveCategory(null);
+      // The bar is sticky top-0 inside scroll-root.
+      // When stuck, its offsetTop equals scrollRoot.scrollTop (approximately).
+      // Simpler: check if the scroll container has scrolled past the menu title.
+      const menuEl = document.getElementById('menu');
+      if (!menuEl) return;
+      const menuTop = menuEl.getBoundingClientRect().top;
+      const scrollRootTop = scrollRoot.getBoundingClientRect().top;
+      // Menu section not yet reached the top of scroll container
+      if (menuTop - scrollRootTop > bar.offsetHeight + 50) {
+        setActiveCategory(null);
+      }
     };
 
     scrollRoot.addEventListener('scroll', onScroll, { passive: true });
@@ -86,7 +101,10 @@ export default function MenuSection() {
     if (el) {
       const scrollRoot = getScrollRoot();
       const fixedH = stickyBarRef.current?.offsetHeight ?? 80;
-      const y = el.getBoundingClientRect().top + scrollRoot.scrollTop - fixedH - 16;
+      // getBoundingClientRect is relative to viewport; we need relative to scroll container
+      const scrollRootRect = scrollRoot.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const y = elRect.top - scrollRootRect.top + scrollRoot.scrollTop - fixedH - 16;
       scrollRoot.scrollTo({ top: y, behavior: 'smooth' });
     }
 
@@ -103,7 +121,6 @@ export default function MenuSection() {
           {t('title')}
         </h2>
 
-        {/* Sticky category bar */}
         <div
           ref={stickyBarRef}
           className="sticky top-0 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-dark border-b border-gray-800/40"
@@ -111,7 +128,6 @@ export default function MenuSection() {
           <CategoryTabs activeCategory={activeCategory} onSelect={scrollToCategory} />
         </div>
 
-        {/* All sections rendered directly — no lazy loading */}
         <div className="mt-10 space-y-12">
           {sections.map((section) => {
             const Icon = categoryIcons[section.id];
