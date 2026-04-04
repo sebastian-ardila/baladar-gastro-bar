@@ -6,9 +6,9 @@ import { buildReservationMessage, buildWhatsAppUrl } from '@/lib/whatsapp';
 import { FaWhatsapp } from 'react-icons/fa';
 import { HiPlus, HiMinus } from 'react-icons/hi';
 import { HiOutlineCalendar } from 'react-icons/hi2';
-import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import Select from '@/components/ui/Select';
+
+/* ── Helpers ── */
 
 function formatDateLabel(dateStr: string, locale: string): string {
   if (!dateStr) return '';
@@ -25,6 +25,53 @@ function formatDateLabel(dateStr: string, locale: string): string {
 
   return `${dayNames[date.getDay()]} ${day} ${isEs ? 'de' : ''} ${monthNames[month - 1]}`.replace('  ', ' ');
 }
+
+interface TimeSlot {
+  value: string;
+  label: string;
+}
+
+interface TimeGroup {
+  name: { es: string; en: string };
+  emoji: string;
+  slots: TimeSlot[];
+}
+
+const timeGroups: TimeGroup[] = [
+  {
+    name: { es: 'Mañana', en: 'Morning' },
+    emoji: '☀️',
+    slots: [
+      { value: '11:00 AM', label: '11:00' },
+      { value: '12:00 PM', label: '12:00' },
+    ],
+  },
+  {
+    name: { es: 'Tarde', en: 'Afternoon' },
+    emoji: '🌤️',
+    slots: [
+      { value: '1:00 PM', label: '1:00' },
+      { value: '2:00 PM', label: '2:00' },
+      { value: '3:00 PM', label: '3:00' },
+      { value: '4:00 PM', label: '4:00' },
+      { value: '5:00 PM', label: '5:00' },
+    ],
+  },
+  {
+    name: { es: 'Noche', en: 'Evening' },
+    emoji: '🌙',
+    slots: [
+      { value: '6:00 PM', label: '6:00' },
+      { value: '7:00 PM', label: '7:00' },
+      { value: '8:00 PM', label: '8:00' },
+      { value: '9:00 PM', label: '9:00' },
+      { value: '10:00 PM', label: '10:00' },
+      { value: '11:00 PM', label: '11:00' },
+    ],
+  },
+];
+
+/* ── Component ── */
 
 export default function ReservationForm() {
   const t = useTranslations('reservation');
@@ -50,16 +97,6 @@ export default function ReservationForm() {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const timeOptions = [
-    { value: '', label: isEs ? 'Seleccionar hora' : 'Select time' },
-    ...Array.from({ length: 13 }, (_, i) => {
-      const hour = 11 + i;
-      const h = hour > 12 ? hour - 12 : hour;
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-      return { value: `${h}:00 ${ampm}`, label: `${h}:00 ${ampm}` };
-    }),
-  ];
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setTried(true);
@@ -78,7 +115,6 @@ export default function ReservationForm() {
     dateInputRef.current?.focus();
   };
 
-  // Show error styling only after user tried to submit
   const showError = (missing: boolean) => tried && missing;
 
   return (
@@ -125,7 +161,7 @@ export default function ReservationForm() {
         </div>
       </div>
 
-      {/* Date — hidden native input + visible button */}
+      {/* Date */}
       <div className="w-full">
         <label className="block text-sm font-medium text-gray-300 mb-2">
           {t('date')}
@@ -162,18 +198,44 @@ export default function ReservationForm() {
         )}
       </div>
 
-      {/* Time */}
-      <div>
-        <Select
-          label={t('time')}
-          id="res-time"
-          options={timeOptions}
-          value={form.time}
-          onChange={(e) => setForm({ ...form, time: e.target.value })}
-          className={showError(missingTime) ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500/30' : ''}
-        />
+      {/* Time — grouped by period */}
+      <div className="w-full">
+        <label className={`block text-sm font-medium mb-3 ${showError(missingTime) ? 'text-red-400' : 'text-gray-300'}`}>
+          {t('time')}
+        </label>
+        <div className="space-y-3">
+          {timeGroups.map((group) => (
+            <div key={group.name.en}>
+              <p className="text-white/30 text-[11px] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                <span>{group.emoji}</span>
+                {group.name[isEs ? 'es' : 'en']}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {group.slots.map((slot) => {
+                  const selected = form.time === slot.value;
+                  return (
+                    <button
+                      key={slot.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, time: slot.value })}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                        selected
+                          ? 'border-accent bg-accent/15 text-white'
+                          : showError(missingTime)
+                            ? 'border-red-500/30 text-white/40 hover:border-gray-500 hover:text-white/60'
+                            : 'border-gray-700 text-white/40 hover:border-gray-500 hover:text-white/60'
+                      }`}
+                    >
+                      {slot.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
         {showError(missingTime) && (
-          <p className="text-red-400 text-xs mt-1.5">{isEs ? 'Selecciona una hora' : 'Select a time'}</p>
+          <p className="text-red-400 text-xs mt-2">{isEs ? 'Selecciona una hora' : 'Select a time'}</p>
         )}
       </div>
 
